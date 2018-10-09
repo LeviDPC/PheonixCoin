@@ -1,0 +1,1 @@
+# PheonixCoin is awesome!
