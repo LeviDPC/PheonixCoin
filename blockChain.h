@@ -21,7 +21,7 @@ public:
 
     string mine(block block);
 
-    bool hexComp(string hex1, string hex2);
+
 };
 
 

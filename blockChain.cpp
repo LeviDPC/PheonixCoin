@@ -15,17 +15,23 @@
 // This Method takes the transactions, the time, the hash of the previous block
 // and a random number. It hashes all this than adds the block to a vector (basically an array list) that is a 
 // class variable.
+
+string ensureLength(string in);
+
+bool hexComp(string in1, string in2);
+
 string blockChain::mine(block blockIn) {
 
 
     vector<transaction>::const_iterator i;
-    int index=0;
+    int index = 0;
     stringstream stream;
-    string hexString="";
+    string hexString = "";
 
     while (true) {
-        //mining Threshold is a variable that the mined hash is check against. This is currently set to
-        string miningThreshold="ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        //mining Threshold is a variable that the mined hash is check against. This is currently set to.
+        //Using non hex formats may result in non intended results
+        string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
         //string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
         time_t curTime = time(NULL);
         srand(curTime);
@@ -42,15 +48,14 @@ string blockChain::mine(block blockIn) {
         }
         stream << curTime << blockIn.getPrevHash() << rand();
         picosha2::hash256_hex_string(stream.str(), hexString);
-       
-		//checks if the hash is less than the value of miningThreshold
-		if (blockChain::hexComp(static_cast<string>(hexString), miningThreshold)) {
+        //checks if the hash is less than the value of miningThreshold
+        if (hexComp(static_cast<string>(hexString), miningThreshold)) {
             // This line is just for testing purposes
-           // if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+            // if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
 
-           blockIn.setSelfHash(hexString);
+            blockIn.setSelfHash(hexString);
             blockChain::minedBlocks.push_back(blockIn);
-            blockChain::prevHash=hexString;
+            blockChain::prevHash = hexString;
 
             return hexString;
         } else
@@ -63,30 +68,34 @@ string blockChain::mine(block blockIn) {
 
 //This function takes in two 64 digit (256 bit) hexadecimal numbers as strings and compares them. It returns true
 // if the first parameter is less than or equal to the second one and false otherwise.
-// The input needs to be 64 digits or unexpected behaviour may occur. This function should work but could definitely
-// use more testing.
-bool blockChain::hexComp(string hex1, string hex2){
+// If the input is input is less than 64 digits than the ensureLength function will add 0s at the beelining of the
+// String. If it is more than it will just take the first 64 digits.
+bool hexComp(string in1, string in2) {
     //This next line is just for testing the function
     //cout<<endl<<"hexString: "<<hex1<<endl<<"miningThreshold: "<<hex2<<endl;
-    string sec1="";
-    string sec2="";
-    unsigned long long sec1Long=0;
-    unsigned long long sec2Long=0;
+    string sec1 = "";
+    string sec2 = "";
+    unsigned long long sec1Long = 0;
+    unsigned long long sec2Long = 0;
 
 
-    for(int i=0;i<8;i++){
-        sec1=hex1.substr(i*8,8);
-        sec2=hex2.substr(i*8,8);
-        sec1Long=std::stoull(sec1,NULL,16);
-        sec2Long=std::stoull(sec2,NULL,16);
+    string hex1 = ensureLength(in1);
+    string hex2 = ensureLength(in2);
+
+
+    for (int i = 0; i < 8; i++) {
+        sec1 = hex1.substr(i * 8, 8);
+        sec2 = hex2.substr(i * 8, 8);
+        sec1Long = std::stoull(sec1, NULL, 16);
+        sec2Long = std::stoull(sec2, NULL, 16);
         //These next two commented lines are just for testing the method.
         //cout<<endl<<"Sec1: "<<sec1<<endl<<"sec2: "<<sec2<<endl;
         //cout<<endl<<"Sec1Long: "<<sec1Long<<endl<<"sec2Long: "<<sec2Long<<endl;
-        if(sec1Long<sec2Long){
+        if (sec1Long < sec2Long) {
 
             return true;
         }
-        if(sec1Long>sec2Long){
+        if (sec1Long > sec2Long) {
             return false;
         }
     }
@@ -98,6 +107,23 @@ bool blockChain::hexComp(string hex1, string hex2){
 }
 
 
+string ensureLength(string in) {
+
+    if (in.length() > 64) {
+        in = in.substr(0, 64);
+    }
+    if (in.length() < 64) {
+
+        for (int i = 0; i < (64 - in.length()); i++) {
+            in = "0" + in;
+
+        }
+
+    }
+    // Testing: cout << "Corrected string is: " << in << endl;
+    return in;
+}
+
 //simply prints the entire block Chain
 
 void blockChain::displayBlockChain() {
@@ -105,12 +131,12 @@ void blockChain::displayBlockChain() {
     int index;
 
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
-    for(i = blockChain::minedBlocks.begin(); i != blockChain::minedBlocks.end(); ++i){
+    for (i = blockChain::minedBlocks.begin(); i != blockChain::minedBlocks.end(); ++i) {
         //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
         //then I can't be bothered
-        index=std::distance(blockChain::minedBlocks.begin(), i);
+        index = std::distance(blockChain::minedBlocks.begin(), i);
         blockChain::minedBlocks[index].displayBlock();
-        cout<<"------------------------------------------------------------"<<endl;
+        cout << "------------------------------------------------------------" << endl;
     }
 }
 
