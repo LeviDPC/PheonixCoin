@@ -11,7 +11,7 @@
 class blockChain {
     std::vector<block> minedBlocks;
     //default hash is the hash of "Levi is Awesome"
-    size_t prevHash=3036377018;
+    string prevHash="6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC";
 public:
     blockChain(const vector<block> &minedBlocks);
 
@@ -19,7 +19,9 @@ public:
 
     blockChain();
 
-    size_t mine(block block);
+    string mine(block block);
+
+    bool hexComp(string hex1, string hex2);
 };
 
 

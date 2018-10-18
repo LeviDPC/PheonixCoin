@@ -11,9 +11,9 @@
 using std::vector;
 class block {
     int blockNumber=-1;
-    size_t prevHash=-1;
+    string prevHash="";
     vector<transaction> transactions;
-   size_t selfHash=-1;
+   string selfHash="";
    time_t time=-1;
 public:
 
@@ -21,13 +21,13 @@ public:
 
     void removeLatestTransaction();
 
-    size_t getSelfHash() const;
+    string getSelfHash() const;
 
     time_t getTime() const;
 
     void setTime(time_t time);
 
-    void setSelfHash(size_t selfHash);
+    void setSelfHash(string selfHash);
 
     void displayTransactions() const;
 
@@ -38,17 +38,17 @@ public:
     void addTransaction(const vector<transaction> &trans);
 
 
-    size_t getPrevHash() const;
+    string getPrevHash() const;
 
-    void setPrevHash(size_t prevHash);
+    void setPrevHash(string prevHash);
 
     const vector<transaction> &getTransactions() const;
 
     void setTransactions(const vector<transaction> &transactions);
 
-    block(int blockNumber, size_t prevHash);
+    block(int blockNumber, string prevHash);
 
-    block(int blockNumber, size_t prevHash, const vector<transaction> &transactions);
+    block(int blockNumber, string prevHash, const vector<transaction> &transactions);
 
     block(transaction trans);
 

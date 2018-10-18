@@ -33,17 +33,17 @@ void block::setBlockNumber(int blockNumber) {
     block::blockNumber = blockNumber;
 }
 
-block::block(int blockNumber, size_t prevHash, const vector<transaction> &transactions) : blockNumber(blockNumber),
+block::block(int blockNumber, string prevHash, const vector<transaction> &transactions) : blockNumber(blockNumber),
                                                                                           prevHash(prevHash),
                                                                                           transactions(transactions) {}
 
-block::block(int blockNumber, size_t prevHash) : blockNumber(blockNumber), prevHash(prevHash) {}
+block::block(int blockNumber, string prevHash) : blockNumber(blockNumber), prevHash(prevHash) {}
 
-size_t block::getPrevHash() const {
+string block::getPrevHash() const {
     return prevHash;
 }
 
-void block::setPrevHash(size_t prevHash) {
+void block::setPrevHash(string prevHash) {
     block::prevHash = prevHash;
 }
 
@@ -55,11 +55,11 @@ void block::setTransactions(const vector<transaction> &transactions) {
     block::transactions = transactions;
 }
 
-size_t block::getSelfHash() const {
+string block::getSelfHash() const {
     return selfHash;
 }
 
-void block::setSelfHash(size_t selfHash) {
+void block::setSelfHash(string selfHash) {
     block::selfHash = selfHash;
 }
 

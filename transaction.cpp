@@ -4,9 +4,11 @@
 
 #include "transaction.h"
 
-size_t transaction::getSelfHash() const {
+string transaction::getSelfHash() const {
+    string out="";
+    picosha2::hash256_hex_string(transaction::transactionToString(),out);
 
-    return std::hash<string>{}(transaction::transactionToString());
+    return out;
 
 
 }

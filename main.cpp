@@ -1,3 +1,6 @@
+//This now uses sha256 for hashing. This functionality comes from the file picosha2.h. I got it from google. Its
+// open source under the MIT licence. The licence is included in the file itself.
+
 #include <iostream>
 #include <string>
 #include "transaction.h"
@@ -6,7 +9,6 @@
 using namespace std;
 
 int main() {
-
 
     transaction trans2("Levi Pfantz", 10, "Ibrahiam");
     transaction trans3("Levi Pfantz", 10, "Hunter");
@@ -25,7 +27,6 @@ int main() {
     daChain.mine(levisBlock4);
 
     daChain.displayBlockChain();
-
 
 
     system("Pause");

@@ -8,6 +8,7 @@
 #include <ctime>
 #include <sstream>
 #include <stddef.h>
+#include "picosha2.h"
 using namespace std;
 
 //Questions: 1. Why was was const used in all the get functions
@@ -34,7 +35,7 @@ public:
 
     transaction();
 
-    size_t getSelfHash() const;
+    string getSelfHash() const;
 
     int getBlockNumber() const;
 
