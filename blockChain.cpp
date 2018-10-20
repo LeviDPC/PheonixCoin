@@ -20,51 +20,49 @@ string ensureLength(string in);
 
 bool hexComp(string in1, string in2);
 
+
+
+
+
 string blockChain::mine(block blockIn) {
 
 
-    vector<transaction>::const_iterator i;
-    int index = 0;
-    stringstream stream;
-    string hexString = "";
 
-    while (true) {
-        //mining Threshold is a variable that the mined hash is check against. This is currently set to.
-        //Using non hex formats may result in non intended results
-        string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-        //string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
-        time_t curTime = time(NULL);
-        srand(curTime);
-        blockIn.setBlockNumber(blockChain::minedBlocks.size() + 1);
-        blockIn.setTime(curTime);
-        blockIn.setPrevHash(blockChain::prevHash);
-        blockIn.addTransaction(transaction("Pheonix Gen", 50, "Levi Pfantz"));
-        //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
-        for (i = blockIn.getTransactions().begin(); i != blockIn.getTransactions().end(); ++i) {
-            //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
-            //then I can't be bothered
-            index = std::distance(blockIn.getTransactions().begin(), i);
-            stream << blockIn.getTransactions()[index].transactionToString();
-        }
-        stream << curTime << blockIn.getPrevHash() << rand();
-        picosha2::hash256_hex_string(stream.str(), hexString);
-        //checks if the hash is less than the value of miningThreshold
-        if (hexComp(static_cast<string>(hexString), miningThreshold)) {
-            // This line is just for testing purposes
-            // if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+	while (true) {
+		//mining Threshold is a variable that the mined hash is check against. This is currently set to.
+		//Using non hex formats may result in non intended results
+		string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+		//string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
+		time_t curTime = time(NULL);
+		srand(curTime);
+		int nonce = rand();
+		blockIn.addTransaction(transaction("Pheonix Gen", 50, "Levi Pfantz"));
 
-            blockIn.setSelfHash(hexString);
-            blockChain::minedBlocks.push_back(blockIn);
-            blockChain::prevHash = hexString;
+		string hash = blockIn.genHash(curTime, blockChain::prevHash, nonce);
 
-            return hexString;
-        } else
-            blockIn.removeLatestTransaction();
 
-    }
+		//checks if the hash is less than the value of miningThreshold
+		if (hexComp(static_cast<string>(hash), miningThreshold)) {
+			// This line is just for testing purposes
+			// if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+			blockIn.setBlockNumber(blockChain::minedBlocks.size() + 1);
+			blockIn.setTime(curTime);
+			blockIn.setPrevHash(blockChain::prevHash);
+			blockIn.setSelfHash(hash);
+			blockIn.setNonce(nonce);
+			blockChain::minedBlocks.push_back(blockIn);
+			blockChain::prevHash = hash;
+
+			return hash;
+		}
+		else
+			blockIn.removeLatestTransaction();
+
+	}
 
 
 }
+
 
 //This function takes in two 64 digit (256 bit) hexadecimal numbers as strings and compares them. It returns true
 // if the first parameter is less than or equal to the second one and false otherwise.
@@ -143,6 +141,19 @@ void blockChain::displayBlockChain() {
 blockChain::blockChain() {}
 
 blockChain::blockChain(const vector<block> &minedBlocks) : minedBlocks(minedBlocks) {}
+
+const vector<block> &blockChain::getMinedBlocks() const {
+    return minedBlocks;
+}
+
+const block &blockChain::getBlockFromChain(int in) const {
+
+    return minedBlocks[in];
+
+}
+void blockChain::setMinedBlocks(const vector<block> &minedBlocks) {
+    blockChain::minedBlocks = minedBlocks;
+}
 
 
 

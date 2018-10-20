@@ -21,6 +21,12 @@ public:
 
     string mine(block block);
 
+    const vector<block> &getMinedBlocks() const;
+
+    const block &getBlockFromChain(int in) const;
+
+    void setMinedBlocks(const vector<block> &minedBlocks);
+
 
 };
 

@@ -8,6 +8,8 @@
 #include <vector>
 #include "transaction.h"
 #include <iostream>
+#include <string>
+#include <functional>
 using std::vector;
 class block {
     int blockNumber=-1;
@@ -15,7 +17,12 @@ class block {
     vector<transaction> transactions;
    string selfHash="";
    time_t time=-1;
+   int nonce = -1;
 public:
+
+	const bool verifyHash() const;
+
+	const string genHash(time_t time, string prevHashIn, int nonce) const;
 
     void displayBlock();
 
@@ -58,6 +65,10 @@ public:
     int getBlockNumber() const;
 
     void setBlockNumber(int blockNumber);
+
+	int getNonce() const;
+
+	void setNonce(int nonce);
 
 };
 

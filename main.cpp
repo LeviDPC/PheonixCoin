@@ -29,6 +29,15 @@ int main() {
     daChain.displayBlockChain();
 
 
+    cout<<endl<<"In c++ a value of 1 for bool means true"<<endl;
+    for(int i=0; i<4; i++){
+
+        cout<<"Block "<<i<<": "<<daChain.getBlockFromChain(i).verifyHash()<<endl;
+
+    }
+
+
+
     system("Pause");
     return 0;
 }

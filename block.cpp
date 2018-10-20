@@ -7,6 +7,42 @@
 
 
 
+
+const bool block::verifyHash() const {
+
+	string generatedHash = block::genHash(block::time, block::prevHash, block::nonce);
+	if (generatedHash.compare(block::selfHash) == 0)
+		return true;
+	
+	else
+		return false;
+}
+
+const string block::genHash(time_t time, string prevHashIn, int nonce) const {
+
+	vector<transaction>::const_iterator i;
+	int index = 0;
+	stringstream stream;
+	string hexString = "";
+
+
+		//apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+		for (i = block::transactions.begin(); i != block::transactions.end(); ++i) {
+			//based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+			//then I can't be bothered
+			index = std::distance(block::transactions.begin(), i);
+			stream << block::transactions[index].transactionToString();
+		}
+		stream << time << prevHashIn << nonce;
+		picosha2::hash256_hex_string(stream.str(), hexString);
+		return hexString;
+
+	
+
+
+}
+
+
 void block::addTransaction(const transaction &trans) {
     block::transactions.push_back(trans);
 }
@@ -31,6 +67,15 @@ int block::getBlockNumber() const {
 
 void block::setBlockNumber(int blockNumber) {
     block::blockNumber = blockNumber;
+}
+
+int block::getNonce() const {
+	return block::nonce;
+}
+
+
+void block::setNonce(int nonce) {
+	block::nonce = nonce;
 }
 
 block::block(int blockNumber, string prevHash, const vector<transaction> &transactions) : blockNumber(blockNumber),
