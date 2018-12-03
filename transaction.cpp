@@ -20,6 +20,13 @@ string transaction::transactionToString() const {
     return stream.str();
 }
 
+ostream & operator<<(ostream & stream, const transaction & in)
+{
+	stream << in.transactionToString();
+	return stream;
+}
+
+
 transaction::transaction() {}
 
 transaction::transaction(const string &sender, int amount, const string &receiver) {
@@ -80,5 +87,4 @@ void transaction::setManTime(time_t time) {
 void transaction::setTime() {
     transaction::time=std::time(NULL);
 }
-
 

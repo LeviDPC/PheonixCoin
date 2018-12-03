@@ -3,7 +3,6 @@
 //
 
 #include "block.h"
-#include <vector>
 
 
 
@@ -121,31 +120,48 @@ void block::removeLatestTransaction(){
 
 }
 
-void block::displayBlock() {
-    cout<<"Block Number: "<<block::blockNumber<<endl;
-    cout<<"Block Generation Time: "<<block::time<<endl;
-    cout<<"Previous Block Hash: "<<block::prevHash<<endl;
-    cout<<"This Block's Hash: "<<block::selfHash<<endl;
-    cout<<"Number of Transactions in Block: "<<block::transactions.size()<<endl;
-    displayTransactions();
+string block::blockInfoToString() const {
+	stringstream stream;
 
+	stream << "Block Number: " << block::blockNumber << endl;
+	stream << "Block Generation Time: " << block::time << endl;
+	stream << "Previous Block Hash: " << block::prevHash << endl;
+	stream << "This Block's Hash: " << block::selfHash << endl;
+	stream << "Number of Transactions in Block: " << block::transactions.size() << endl;
+	return stream.str();
 }
 
-void block::displayTransactions() const {
+string block::toString() const {
+	stringstream stream;
+
+	stream << block::blockInfoToString();
+    stream<<block::transactoinsToString();
+	
+	return stream.str();
+}
+
+ostream & operator<<(ostream & stream, const block & in)
+{
+	stream << in.toString();
+	return stream;
+}
+
+string block::transactoinsToString() const {
 
     vector<transaction>::const_iterator i;
     int index=0;
-
+	stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
     for(i = block::transactions.begin(); i != block::transactions.end(); ++i){
         //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
         //then I can't be bothered
         index=std::distance(block::transactions.begin(), i);
-        std::cout<<endl<<"Transaction Hash: "<<block::transactions[index].getSelfHash()<<endl;
+        stream<<endl<<"Transaction Hash: "<<block::transactions[index].getSelfHash()<<endl;
 
 
-        std::cout<<block::transactions[index].transactionToString()<<endl;
+        stream<<block::transactions[index].transactionToString()<<endl;
     }
+	return stream.str();
 }
 
 

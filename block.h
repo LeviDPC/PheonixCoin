@@ -24,7 +24,11 @@ public:
 
 	const string genHash(time_t time, string prevHashIn, int nonce) const;
 
-    void displayBlock();
+	string blockInfoToString() const;
+
+    string toString() const;
+
+	friend ostream& operator<< (ostream& stream, const block& in);
 
     void removeLatestTransaction();
 
@@ -36,7 +40,7 @@ public:
 
     void setSelfHash(string selfHash);
 
-    void displayTransactions() const;
+	string transactoinsToString() const;
 
 
     void addTransaction(const transaction &trans);

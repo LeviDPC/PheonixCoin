@@ -6,8 +6,8 @@
 #define BLOCKCHAINGOOFIN_TRANSACTION_H
 #include <string>
 #include <ctime>
-#include <sstream>
 #include <stddef.h>
+#include <iostream>
 #include "picosha2.h"
 using namespace std;
 
@@ -60,6 +60,8 @@ public:
     void setManTime(time_t time);
 
     string transactionToString() const;
+
+	friend ostream& operator<< (ostream& stream, const transaction& in);
 
 
 
