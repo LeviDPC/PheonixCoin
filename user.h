@@ -12,7 +12,6 @@ private:
 
 public:
 	user();
-	~user();
 	user(string userName, string publickKey, long balance);
 	user(string publickKey, long balance);
 	user(string publickKey);
@@ -34,6 +33,9 @@ public:
 
 	bool operator > (const user &);
 	bool operator < (const user &);
+
+	user operator +=(const long &);
+	user operator -=(const long &);
 	
 
 };

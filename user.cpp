@@ -1,10 +1,8 @@
 #include "user.h"
 
 
-
 user::user(){}
 
-user::~user(){}
 
 user::user(string userName, string publickKey, long balance) {
 	user::userName = userName;
@@ -68,13 +66,20 @@ ostream &operator<<(ostream &stream, const user &in)
 	return stream;
 }
 
-
-user operator+=(const user &)
+bool user::operator>(const user &in)
 {
-	return user();
+	return user::balance > in.getBalance();
 }
 
-user operator+=(const user &)
+bool user::operator<(const user &in)
 {
-	return user();
+	return user::balance < in.getBalance();
+}
+
+user user::operator +=(const long &in){
+	return user(user::userName, user::publicKey, user::balance + in);
+	}
+
+user user::operator -=(const long &in) {
+	return user(user::userName, user::publicKey, user::balance - in);
 }
