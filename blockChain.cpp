@@ -149,18 +149,58 @@ blockChain::blockChain() {}
 
 blockChain::blockChain(const vector<block> &minedBlocks) : minedBlocks(minedBlocks) {}
 
-const vector<block> &blockChain::getMinedBlocks() const {
-    return minedBlocks;
-}
-
 const block &blockChain::getBlockFromChain(int in) const {
 
     return minedBlocks[in];
 
 }
+
+const vector<block> &blockChain::getMinedBlocks() const {
+	return minedBlocks;
+}
+
 void blockChain::setMinedBlocks(const vector<block> &minedBlocks) {
     blockChain::minedBlocks = minedBlocks;
 }
 
 
+const vector<user> &blockChain::getuserList() const {
+	return userList;
+}
 
+void blockChain::setUserList(const vector<user> &listIn) {
+	blockChain::userList = listIn;
+}
+
+user blockChain::getByPublcKey(string publicKey){
+	vector<user>::iterator i;
+	int index;
+	stringstream stream;
+	//apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+	for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+		//based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+		//then I can't be bothered
+		index = std::distance(blockChain::userList.begin(), i);
+		if (publicKey.compare(userList[index].getPublicKey) == 0)
+			return userList[index];
+	}
+
+	return user(NULL, NULL, NULL);
+
+}
+
+bool blockChain::isPublicKeyInList(string publicKey) {
+	vector<user>::iterator i;
+	int index;
+	stringstream stream;
+	//apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+	for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+		//based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+		//then I can't be bothered
+		index = std::distance(blockChain::userList.begin(), i);
+		if (publicKey.compare(userList[index].getPublicKey) == 0)
+			return true;
+	}
+
+	return false;
+}
