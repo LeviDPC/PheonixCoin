@@ -26,7 +26,7 @@ int main() {
     daChain.mine(levisBlock3);
     daChain.mine(levisBlock4);
 
-    daChain.displayBlockChain();
+    cout<<daChain;
 
 
     cout<<endl<<"In c++ a value of 1 for bool means true"<<endl;

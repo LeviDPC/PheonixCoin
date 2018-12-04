@@ -7,6 +7,7 @@
 
 #include "block.h"
 #include <functional>
+#include <iostream>
 
 class blockChain {
     std::vector<block> minedBlocks;
@@ -15,7 +16,9 @@ class blockChain {
 public:
     blockChain(const vector<block> &minedBlocks);
 
-    void displayBlockChain();
+    string toString() const;
+
+	friend ostream& operator<< (ostream& stream, const blockChain& in);
 
     blockChain();
 

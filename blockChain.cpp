@@ -124,18 +124,25 @@ string ensureLength(string in) {
 
 //simply prints the entire block Chain
 
-void blockChain::displayBlockChain() {
-    vector<block>::iterator i;
+string blockChain::toString() const {
+    vector<block>::const_iterator i;
     int index;
-
+	stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
     for (i = blockChain::minedBlocks.begin(); i != blockChain::minedBlocks.end(); ++i) {
         //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
         //then I can't be bothered
         index = std::distance(blockChain::minedBlocks.begin(), i);
-        blockChain::minedBlocks[index].displayBlock();
-        cout << "------------------------------------------------------------" << endl;
+        stream<<blockChain::minedBlocks[index];
+        stream << "------------------------------------------------------------" << endl;
     }
+	return stream.str();
+}
+
+ostream & operator<<(ostream & stream, const blockChain & in)
+{
+	stream << in.toString();
+	return stream;
 }
 
 blockChain::blockChain() {}
