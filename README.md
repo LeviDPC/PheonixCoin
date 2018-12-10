@@ -14,6 +14,8 @@ These files are fromatted in valid JSON, that being said the program can't take 
 
 at hte end of it's runtime the program will create a file called results.txt The first line will be contain Success! or Failure! and the following lines will contain more information.
 
+My thought is that the front end should let the user do the 3 things (create user, create transaction, mine) and view the 3 data sources(users, unmined blocks, and the whold blockChain)
+
 All the basic features are implented. You can create users, transactions and when you mine the transactions the user list is updated and balances are calculated. 
 
 More testing should be done and I still have a crap tone of clean up to do on the code but the basics are there.
