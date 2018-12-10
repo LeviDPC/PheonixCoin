@@ -26,6 +26,8 @@ public:
 
 	string blockInfoToString() const;
 
+	string JSONOutput(string whiteSpaceBeginning="\t", string tag="\"block\": ") const;
+
     string toString() const;
 
 	friend ostream& operator<< (ostream& stream, const block& in);
@@ -62,7 +64,6 @@ public:
     block(int blockNumber, string prevHash, const vector<transaction> &transactions);
 
     block(transaction trans);
-
 
     block();
 

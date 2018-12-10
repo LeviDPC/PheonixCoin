@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include <iostream>
 #include "picosha2.h"
+#include "user.h"
+
 using namespace std;
 
 //Questions: 1. Why was was const used in all the get functions
@@ -21,33 +23,57 @@ class transaction {
 
  
     int blockNumber;
-    string sender="Pheonix Gen";
-    string receiver="Levi Pfantz";
+    string senderName="";
+    string senderKey="";
+    string senderSig="";
+    string receiverName="";
+    string receiverKey="";
+
     double amount=0;
     time_t time=0;
-
 public:
+    const string &getSenderName() const;
 
+    void setSenderName(const string &senderName);
 
-    transaction(const string &sender, int amount, const string &receiver);
+    const string &getSenderKey() const;
 
-    transaction(const string &sender, int amount, const string &receiver, int blockNumber);
+    void setSenderKey(const string &senderKey);
+
+    const string &getSenderSig() const;
+
+    void setSenderSig(const string &senderSig);
+
+    const string &getReceiverName() const;
+
+    void setReceiverName(const string &receiverName);
+
+    const string &getReceiverKey() const;
+
+    void setReceiverKey(const string &receiverKey);
+
+    transaction(const string &senderKey, const string &senderSig, int amount, const string &receiverKey);
+    transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount, const string &recieverName, const string &receiverKey);
+
 
     transaction();
 
     string getSelfHash() const;
 
-    int getBlockNumber() const;
+    string JSONOutput(string whiteSpaceBeginning="\t", string tag="\"transaction\": ", bool multiLine=true) const;
+
+
+	string toString() const;
+
+	string toStringWithoutHash() const;
+
+	friend ostream& operator<< (ostream& stream, const transaction& in);
+
+
+	int getBlockNumber() const;
 
     void setBlockNumber(int blockNumber);
 
-    const string &getSender() const;
-
-    void setSender(const string &sender);
-
-    const string &getreceiver() const;
-
-    void setreceiver(const string &receiver);
 
     double getAmount() const;
 
@@ -55,16 +81,13 @@ public:
 
     time_t getTime() const;
 
-    void setTime();
+    void setAutoTime();
 
     void setManTime(time_t time);
 
-    string transactionToString() const;
+    bool verifySignature() const;
 
-	friend ostream& operator<< (ostream& stream, const transaction& in);
-
-
-
+    bool verifyTransaction(const vector<user> &userListIn);
 
 };
 

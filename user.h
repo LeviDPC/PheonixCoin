@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include <iostream>
+#include <time.h>
 using namespace std;
 class user
 {
@@ -12,11 +14,14 @@ private:
 
 public:
 	user();
-	user(string userName, string publickKey, long balance);
-	user(string publickKey, long balance);
-	user(string publickKey);
-	
-	string getUserName() const;
+    user(string userName, string publicKey, long balance);
+	user(string publicKey, long balance);
+    user(string publicKey);
+
+
+
+
+    string getUserName() const;
 	string getPublicKey() const;
 	long getBalance() const;
 
@@ -27,6 +32,8 @@ public:
 	void addToBalance(long in);
 	void subtractFromBalance(long in);
 
+    string JSONOutput(string whiteSpaceBeginning="\t", string tag="\"user\": ", bool multiLine=true) const;
+
 	string toString() const;
 
 	friend ostream &operator << (ostream &, const user &);
@@ -34,9 +41,18 @@ public:
 	bool operator > (const user &);
 	bool operator < (const user &);
 
-	user operator +=(const long &);
-	user operator -=(const long &);
-	
+	user &operator +=(const long &);
+	user &operator -=(const long &);
+
+	string genSetPublicKey(const string &privateKeyIn);
+
+    static string genPrivateKey();
+
+    static string genSignature(const string &privateKeyIn);
+
+    static string rand256Gen();
+
+
 
 };
 

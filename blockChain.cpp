@@ -21,46 +21,80 @@ string ensureLength(string in);
 bool hexComp(string in1, string in2);
 
 
+blockChain::blockChain() {}
+
+blockChain::blockChain(const vector<block> &minedBlocks) : minedBlocks(minedBlocks) {}
+
+string blockChain::mine(block blockIn, const string &key) {
 
 
-
-string blockChain::mine(block blockIn) {
-
+    verifyTransactions(blockIn);
 
 
-	while (true) {
-		//mining Threshold is a variable that the mined hash is check against. This is currently set to.
-		//Using non hex formats may result in non intended results
-		string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
-		//string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
-		time_t curTime = time(NULL);
-		srand(curTime);
-		int nonce = rand();
-		blockIn.addTransaction(transaction("Pheonix Gen", 50, "Levi Pfantz"));
+    while (true) {
+        //mining Threshold is a variable that the mined hash is check against. This is currently set to.
+        //Using non hex formats may result in non intended results
+        string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+        //string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
+        time_t curTime = time(NULL);
+        srand(curTime);
+        int nonce = rand();
+        //blockIn.addTransaction(transaction("Pheonix Gen", 50, "Levi Pfantz"));
 
-		string hash = blockIn.genHash(curTime, blockChain::prevHash, nonce);
-
-
-		//checks if the hash is less than the value of miningThreshold
-		if (hexComp(static_cast<string>(hash), miningThreshold)) {
-			// This line is just for testing purposes
-			// if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
-			blockIn.setBlockNumber(blockChain::minedBlocks.size() + 1);
-			blockIn.setTime(curTime);
-			blockIn.setPrevHash(blockChain::prevHash);
-			blockIn.setSelfHash(hash);
-			blockIn.setNonce(nonce);
-			blockChain::minedBlocks.push_back(blockIn);
-			blockChain::prevHash = hash;
-
-			return hash;
-		}
-		else
-			blockIn.removeLatestTransaction();
-
-	}
+        string hash = blockIn.genHash(curTime, blockChain::prevHash, nonce);
 
 
+        //checks if the hash is less than the value of miningThreshold
+        if (hexComp(static_cast<string>(hash), miningThreshold)) {
+            // This line is just for testing purposes
+            // if(blockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+            blockIn.setBlockNumber(blockChain::minedBlocks.size() + 1);
+            blockIn.setTime(curTime);
+            blockIn.setPrevHash(blockChain::prevHash);
+            blockIn.setSelfHash(hash);
+            blockIn.setNonce(nonce);
+
+
+            addUserIfNotExists(key);
+
+            blockIn.addTransaction(transaction("Pheonix Gen", "-1", "-1", 5, getUserByPublicKey(key).getUserName(), key));
+
+            updateUsers(blockIn);
+
+            blockChain::minedBlocks.push_back(blockIn);
+            blockChain::prevHash = hash;
+
+            blockIn=block();
+
+            return hash;
+        } else
+            blockIn.removeLatestTransaction();
+
+    }
+
+
+}
+
+void blockChain::updateUsers(const block &in) {
+    vector<transaction>::const_iterator i;
+    int index;
+    transaction trans;
+
+
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = in.getTransactions().begin(); i != in.getTransactions().end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(in.getTransactions().begin(), i);
+        trans = in.getTransactions()[index];
+
+        if(in.getTransactions()[index].getSenderKey().compare("-1")!=0)
+            getUserByPublicKey(trans.getSenderKey()) -= trans.getAmount();
+
+        addUserIfNotExists(trans.getReceiverKey());
+        getUserByPublicKey(trans.getReceiverKey())+=trans.getAmount();
+
+    }
 }
 
 
@@ -127,27 +161,57 @@ string ensureLength(string in) {
 string blockChain::toString() const {
     vector<block>::const_iterator i;
     int index;
-	stringstream stream;
+    stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
     for (i = blockChain::minedBlocks.begin(); i != blockChain::minedBlocks.end(); ++i) {
         //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
         //then I can't be bothered
         index = std::distance(blockChain::minedBlocks.begin(), i);
-        stream<<blockChain::minedBlocks[index];
+        stream << blockChain::minedBlocks[index];
         stream << "------------------------------------------------------------" << endl;
     }
-	return stream.str();
+    return stream.str();
 }
 
-ostream & operator<<(ostream & stream, const blockChain & in)
-{
-	stream << in.toString();
-	return stream;
+string blockChain::JSONOutput(string whiteSpaceBeginning, string tag) const {
+    vector<block>::const_iterator i;
+    int index;
+    stringstream stream;
+
+    string whiteSpaceEnd = "\n";
+    string whiteSpaceBeginningWithoutAddedTab = whiteSpaceBeginning;
+    whiteSpaceBeginning += "\t";
+
+
+    stream << whiteSpaceBeginningWithoutAddedTab << tag << "{" << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"numbBlocks\": \"" << blockChain::minedBlocks.size() << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"block\": [" << whiteSpaceEnd;
+
+
+
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::minedBlocks.begin(); i != blockChain::minedBlocks.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::minedBlocks.begin(), i);
+        stream << whiteSpaceBeginning << "\t" << blockChain::minedBlocks[index].JSONOutput("\t\t", "");
+        if (index != blockChain::minedBlocks.size() - 1)
+            stream << ",";
+        stream << endl;
+
+    }
+    stream << whiteSpaceBeginning << "]" << whiteSpaceEnd;
+    stream << whiteSpaceBeginningWithoutAddedTab << "}" << whiteSpaceEnd;
+
+    return stream.str();
 }
 
-blockChain::blockChain() {}
 
-blockChain::blockChain(const vector<block> &minedBlocks) : minedBlocks(minedBlocks) {}
+ostream &operator<<(ostream &stream, const blockChain &in) {
+    stream << in.toString();
+    return stream;
+}
+
 
 const block &blockChain::getBlockFromChain(int in) const {
 
@@ -156,7 +220,7 @@ const block &blockChain::getBlockFromChain(int in) const {
 }
 
 const vector<block> &blockChain::getMinedBlocks() const {
-	return minedBlocks;
+    return minedBlocks;
 }
 
 void blockChain::setMinedBlocks(const vector<block> &minedBlocks) {
@@ -165,42 +229,207 @@ void blockChain::setMinedBlocks(const vector<block> &minedBlocks) {
 
 
 const vector<user> &blockChain::getuserList() const {
-	return userList;
+    return userList;
 }
 
 void blockChain::setUserList(const vector<user> &listIn) {
-	blockChain::userList = listIn;
+    blockChain::userList = listIn;
 }
 
-user blockChain::getByPublcKey(string publicKey){
-	vector<user>::iterator i;
-	int index;
-	stringstream stream;
-	//apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
-	for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
-		//based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
-		//then I can't be bothered
-		index = std::distance(blockChain::userList.begin(), i);
-		if (publicKey.compare(userList[index].getPublicKey) == 0)
-			return userList[index];
-	}
+void blockChain::addToUserList(const user &in) {
+    if (in.getPublicKey().compare("-1") == 0 || blockChain::isPublicKeyInList(in.getPublicKey()))
+        throw string("Public Key Already in Use");
+    blockChain::userList.push_back(in);
+}
 
-	return user(NULL, NULL, NULL);
+string blockChain::userListToString() const {
+    if (blockChain::userList.size() < 1)
+        return "";
+    vector<user>::const_iterator i;
+    int index;
+    stringstream stream;
+
+    stream << "User List Length: " << blockChain::userList.size() << endl;
+
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::userList.begin(), i);
+        stream << blockChain::userList[index].toString();
+        stream << endl;
+    }
+
+    return stream.str();
 
 }
 
-bool blockChain::isPublicKeyInList(string publicKey) {
-	vector<user>::iterator i;
-	int index;
-	stringstream stream;
-	//apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
-	for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
-		//based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
-		//then I can't be bothered
-		index = std::distance(blockChain::userList.begin(), i);
-		if (publicKey.compare(userList[index].getPublicKey) == 0)
-			return true;
-	}
 
-	return false;
+string blockChain::userListJSONOutput(string whiteSpaceBeginning, string tag) const {
+    vector<user>::const_iterator i;
+    int index;
+    stringstream stream;
+
+    string whiteSpaceEnd = "\n";
+    string whiteSpaceBeginningWithoutAddedTab = whiteSpaceBeginning;
+    whiteSpaceBeginning += "\t";
+
+
+    stream << whiteSpaceBeginningWithoutAddedTab << tag << "{" << whiteSpaceEnd;
+
+    stream << whiteSpaceBeginning << "\"numbOfUser\": \"" << blockChain::userList.size() << "\"," << whiteSpaceEnd;
+
+    stream << whiteSpaceBeginning << "\"user\": [";
+    if (userList.size() > 0)
+        stream << whiteSpaceEnd;
+
+
+
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::userList.begin(), i);
+        stream << whiteSpaceBeginning << "\t" << blockChain::userList[index].JSONOutput("\t\t", "");
+        if (index != blockChain::userList.size() - 1)
+            stream << ",";
+        stream << endl;
+
+    }
+    if (userList.size() > 0)
+        stream << whiteSpaceBeginning;
+    stream << "]" << whiteSpaceEnd;
+    stream << whiteSpaceBeginningWithoutAddedTab << "}" << whiteSpaceEnd;
+
+    return stream.str();
+}
+
+
+user& blockChain::getUserByPublicKey(const string &publicKey) {
+    vector<user>::iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::userList.begin(), i);
+        if (publicKey.compare(userList[index].getPublicKey()) == 0)
+            return userList[index];
+    }
+            user u("null", "null", -1);
+    throw string("User: "+publicKey+" not on List");
+;
+}
+
+user& blockChain::getUserByPublicKey(const string &publicKey, vector<user> &listIn){
+    vector<user>::iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = listIn.begin(); i != listIn.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(listIn.begin(), i);
+        if (publicKey.compare(listIn[index].getPublicKey()) == 0)
+            return listIn[index];
+    }
+
+    throw string("User not on List");
+}
+
+bool blockChain::isPublicKeyInList(const string &publicKey) const {
+    vector<user>::const_iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::userList.begin(), i);
+        if (publicKey.compare(userList[index].getPublicKey()) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+bool blockChain::isPublicKeyInList(const string &publicKey, const vector<user> &listIn) {
+    vector<user>::const_iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = listIn.begin(); i != listIn.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(listIn.begin(), i);
+        if (publicKey.compare(listIn[index].getPublicKey()) == 0)
+            return true;
+    }
+
+    return false;
+}
+
+void blockChain::addUserIfNotExists(const string &publicKey) {
+    if (!isPublicKeyInList(publicKey)) {
+        blockChain::addToUserList(publicKey);
+    }
+}
+
+void blockChain::addUserIfNotExists(string publicKey, vector<user> &listIn){
+    if (!blockChain::isPublicKeyInList(publicKey, listIn)) {
+        listIn.push_back(publicKey);
+    }
+}
+
+bool blockChain::verifyTransactions(const block &in) const {
+    vector<user> tempUserList=blockChain::userList;
+    vector<transaction>::const_iterator i;
+    int index;
+    transaction trans;
+
+
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = in.getTransactions().begin(); i != in.getTransactions().end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(in.getTransactions().begin(), i);
+
+        trans = in.getTransactions()[index];
+
+        trans.verifySignature();
+
+        getUserByPublicKey(trans.getSenderKey(), tempUserList) -= trans.getAmount();
+        addUserIfNotExists(trans.getReceiverKey(),tempUserList);
+        getUserByPublicKey(trans.getReceiverKey(),tempUserList)+=trans.getAmount();
+
+        if(trans.getAmount()<0){
+            throw string("A positive value must sent!");
+        }
+
+        if(getUserByPublicKey(trans.getSenderKey(), tempUserList).getBalance()<0){
+            throw string("Insufficient Funds!");
+        }
+
+
+    }
+
+    return true;
+}
+
+void blockChain::addToUserByKey(const string &key, int intIn){
+    vector<user>::iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = blockChain::userList.begin(); i != blockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(blockChain::userList.begin(), i);
+        if (key.compare(userList[index].getPublicKey()) == 0) {
+            user temp=blockChain::userList[index];
+            int out=temp.getBalance()+intIn;
+            blockChain::userList[index].setBalance(out);
+        }
+    }
 }
