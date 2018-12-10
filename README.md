@@ -4,13 +4,13 @@ A config file called cppConfig.txt is used to input data into the program.
 
 There are 3 opperation you can call: 1. add a user to the database, 2. add a transaction to the current unmined block 3. mine the current unmined block.
 
-You can find examples of how to structure the cppConfig.txt file in the examples folder
+You can find examples of how to structure the cppConfig.txt file in the examples folder. It is worth noting that you can't have any coments in the config file and it has to be named exactly cppConfig.txt
 
 At the beggining of the program the user list is loaded from users.json, the current unmined block is loaded from unminedBlock.json and the block chain is loaded from blockchain.json. If one or more of the files don't exist than blank objects will be created. At the end of the program it will create these files and output the data in ram into them.
 
 Throught the runtime of this program it will create temp files. These are kept and not deleted because they make debugging easier but aren't important except for that.
 
-These files are fromatted in valid JSON, that being said the program can't take input from any old json file. They have to be formated specifically. You should either use the program to manipulate the data or be very carefull when doing it by hand.
+These files are fromatted in valid JSON, that being said the program can't take input from any old json file. They have to be formated specifically. You should either use the program to manipulate the data or be very carefull when doing it by hand. That being said it handles you putting in empty values through the config file fine unless they are values for things that are designed to be required.
 
 at hte end of it's runtime the program will create a file called results.txt The first line will be contain Success! or Failure! and the following lines will contain more information.
 
