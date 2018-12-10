@@ -1,0 +1,42 @@
+{
+	"blockChain": {
+		"numbBlocks": "3",
+		"block": [
+			{
+			"blockNumber": "1",
+			"blockGenTime": "1544425699",
+			"blockHash": "f4a3b0cfb7704c8f4e51252d34ebd8bec73afdfb8419f0c6d3df5e0b2b080b53",
+			"prevBlockHash": "6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC",
+			"nonce": "23329",
+			"numbOfTrans": "1",
+			"transaction": [
+				{"senderName": "Pheonix Gen","senderKey": "-1","senderSig": "-1","amount": "5","receiverName": "","receiverKey": "1","time": "1544425699"}
+			]
+			},
+			{
+			"blockNumber": "2",
+			"blockGenTime": "1544426253",
+			"blockHash": "33572521e3ad9416c894ba46951d8002cb957948a506a9a9e91778b1a46c6ea8",
+			"prevBlockHash": "6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC",
+			"nonce": "25138",
+			"numbOfTrans": "3",
+			"transaction": [
+				{"senderName": "Levi Pfantz","senderKey": "1","senderSig": "8C037AD158BE369C147BE259C037AD158B0369D147BE259C047AD258B0369D14","amount": "0","receiverName": "Ibra","receiverKey": "2","time": "0"},
+				{"senderName": "Levi Pfantz","senderKey": "1","senderSig": "258B0369D147BE259C047AD258B0369D148BE269C047AD258C036AD148BE269C","amount": "1","receiverName": "Ibra","receiverKey": "2","time": "0"},
+				{"senderName": "Pheonix Gen","senderKey": "-1","senderSig": "-1","amount": "5","receiverName": "","receiverKey": "1","time": "1544426253"}
+			]
+			},
+			{
+			"blockNumber": "3",
+			"blockGenTime": "1544426335",
+			"blockHash": "f60c03c6872a0490169a0a4aacf4e3ffe5fdf395e08bcea1b11556a9fe956c2e",
+			"prevBlockHash": "6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC",
+			"nonce": "25406",
+			"numbOfTrans": "1",
+			"transaction": [
+				{"senderName": "Pheonix Gen","senderKey": "-1","senderSig": "-1","amount": "5","receiverName": "Levi Pfantz","receiverKey": "1","time": "1544426335"}
+			]
+			}
+		]
+	}
+}

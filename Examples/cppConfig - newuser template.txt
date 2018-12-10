@@ -1,0 +1,12 @@
+newuser
+true
+Levi Pfantz
+2421342314abcd32453425324
+//Notes:
+//The first two lines at leaset must be included, the others are optional
+//Line 1 is the command to add a new user
+//line 2 is wether the user knows his/her private key and is importing a public key. it must be true or false
+//line 3 is user name
+//line 4 is public key, this will be ignroed if line 2 is false
+//if the new user command is passed than the file must be 2, 3, or 4 lines long
+//All these notes must be removes for this file to be run

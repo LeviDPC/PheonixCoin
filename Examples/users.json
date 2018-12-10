@@ -1,0 +1,23 @@
+{
+	"userList": {
+		"numbOfUser": "3",
+		"user": [
+			{
+			"userName": "Levi",
+			"userKey": "1",
+			"balance": "14"
+			},
+			{
+			"userName": "",
+			"userKey": "E258C037AD158BE369C147AE259C037AD158BE369D147BE259C037AD258B0369",
+			"balance": "0"
+			},
+			{
+			"userName": "Ibra",
+			"userKey": "2",
+			"balance": "1"
+			}
+		]
+	}
+
+}

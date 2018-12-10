@@ -1,0 +1,2 @@
+mine
+1//The key of the person mining, they will be credited 5 pheonix coin for successfull mining

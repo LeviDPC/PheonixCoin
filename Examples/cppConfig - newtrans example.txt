@@ -1,0 +1,9 @@
+newtrans//opperation to be performed
+2345345//Sender Public Key
+1342514532//Sender private Key - used to generate signature
+1// The amount to be sent
+1234234513452// Reciever public Key
+//Notes:
+//This file needs to be 5 lines for this to work
+//If the sender isn't already on the userList than an error will be thrown
+//if the reciever is not on the list than they will be added
