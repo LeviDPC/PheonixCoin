@@ -4,12 +4,12 @@
 //TODO:
 //Next up:
 
-//      mine needs to update balance of users
+//
 //      do IO in a class
 // Eventually:
-//      implemnt bool verifyTransaction(const vector<user> &userListIn) in transaction
+//      implemnt bool verifyTransaction(const vector<user> &userListIn) in Transaction
 //      implemnt verifyTransactions(blockIn.getTransactions()) in blockchain.cpp
-//      implement veirfySignature() in transaction.cpp
+//      implement veirfySignature() in Transaction.cpp
 //      implement genSignature() in user.cpp
 //      implement verify keys imputed are in hex form with throwing errors
 //      inputting users into transactions
@@ -18,14 +18,15 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include "transaction.h"
-#include "block.h"
-#include "blockChain.h"
-#include "user.h"
+#include "Transaction.h"
+#include "Block.h"
+#include "BlockChain.h"
+#include "User.h"
+#include "Driver.h"
 
 using namespace std;
 
-string getOpFromConfigFile();
+
 
 string configName = "cppConfig.txt";
 
@@ -43,47 +44,45 @@ void outPutResults(const string &in);
 
 int getLines(string nameOfFile);
 
-int newUser(blockChain &blockChainIn);
+void writeBlockChain(const BlockChain &blockChainIn);
 
-int newTrans(block &blockIn, blockChain &blockChainIn);
+void writeUsers(const BlockChain &blockChainIn);
 
-int mine(block &blockIn, blockChain &blockChainIn);
-
-void writeBlockChain(const blockChain &blockChainIn);
-
-void writeUsers(const blockChain &blockChainIn);
-
-void writeUnminedBlock(const block &blockIn);
-
+void writeUnminedBlock(const Block &blockIn);
 
 void printFile(string fileName);
 
-void loadData(block &blockIn, blockChain &blockChainIn);
+void loadData(Block &blockIn, BlockChain &blockChainIn);
 
 
-int loadBlockData(block &blockIn, string inputFileName=unminedBlockFileName);
+int loadBlockData(Block &blockIn, string inputFileName=unminedBlockFileName);
 
-void loadBlockChainData(blockChain &blockChainIn);
+void loadBlockChainData(BlockChain &blockChainIn);
 
-int loadUserData(blockChain &blockChainIn);
+int loadUserData(BlockChain &blockChainIn);
 
 void skipLine(ifstream &, int = 1);
 
 string getBetweenQuestionMakrs(const string &stringIn, int intIn);
 
-transaction transFromString(const string &in);
+Transaction transFromString(const string &in);
 
 void addLinesToStream(ofstream &outStream, ifstream &inStream, int number);
 
 int runNumb=1;
 
 int main() {
-    blockChain primaryChain = blockChain();
-    block unminedBlock = block();
+    BlockChain primaryChain = BlockChain();
+    Block unminedBlock = Block();
+
 
     loadData(unminedBlock, primaryChain);
 
-    //
+    Driver driver(configName, resultFileName, unminedBlock, primaryChain);
+
+    driver.drive();
+
+    driver.outPut(unminedBlock, primaryChain);
 
 
 
@@ -92,37 +91,6 @@ int main() {
     //primaryChain.addToUserList(user("Hunter", "4563544334252", 43));
     //primaryChain.addToUserList(user("Ibrahim", "547576", 555));
 
-    bool opPerformed = false;
-    string op = "";
-    op = getOpFromConfigFile();
-    //--
-
-
-    if (op.compare("newuser") == 0) {
-
-        opPerformed = true;
-        newUser(primaryChain);
-
-    }
-
-    if (op.compare("newtrans") == 0) {
-        opPerformed = true;
-        newTrans(unminedBlock, primaryChain);
-    }
-
-    if (op.compare("mine") == 0) {
-        opPerformed = true;
-        mine(unminedBlock, primaryChain);
-    }
-
-
-    if (op.compare("run") == 0) {
-        opPerformed = true;
-        outPutResults("Success!\nProgram Run");
-    }
-
-    if (opPerformed == false)
-        outPutResults("Error!\nNo Valid Operation Selected!");
 
 
     writeBlockChain(primaryChain);
@@ -137,7 +105,7 @@ int main() {
         return 0;
 }
 
-void loadData(block &blockIn, blockChain &blockChainIn) {
+void loadData(Block &blockIn, BlockChain &blockChainIn) {
     if (getLines(unminedBlockFileName) > 0)
         loadBlockData(blockIn);
 
@@ -149,8 +117,8 @@ void loadData(block &blockIn, blockChain &blockChainIn) {
     }
 }
 
-int loadBlockData(block &blockIn, string inputFileName) {
-    block out = block();
+int loadBlockData(Block &blockIn, string inputFileName) {
+    Block out = Block();
     string line = "";
     ifstream inputFile(inputFileName);
     string blockNum;
@@ -222,12 +190,12 @@ int loadBlockData(block &blockIn, string inputFileName) {
     return 0;
 }
 
-transaction transFromString(const string &in) {
+Transaction transFromString(const string &in) {
     string line = in;
 
 
 
-    transaction out = transaction();
+    Transaction out = Transaction();
 
 
 
@@ -259,11 +227,11 @@ transaction transFromString(const string &in) {
 
 }
 
-void loadBlockChainData(blockChain &blockChainIn) {
+void loadBlockChainData(BlockChain &blockChainIn) {
     ifstream inputFile(blockChainFileName);
     ofstream temp(tempFileName);
-    vector<block> tempList;
-    block tempBlock;
+    vector<Block> tempList;
+    Block tempBlock;
     int numbBlocks;
     int numbTrans;
     string line;
@@ -285,7 +253,7 @@ void loadBlockChainData(blockChain &blockChainIn) {
         builder=stringstream();
         builder<<i<<tempFileName;
         temp=ofstream(builder.str());
-        tempBlock=block();
+        tempBlock=Block();
         addLinesToStream(temp, inputFile, 9);
         getline(inputFile, line);
 
@@ -309,7 +277,7 @@ void loadBlockChainData(blockChain &blockChainIn) {
     inputFile.close();
 }
 
-int loadUserData(blockChain &blockChainIn) {
+int loadUserData(BlockChain &blockChainIn) {
     vector<user> out;
     user temp = user();
     ifstream inputFile(userFileName);
@@ -376,15 +344,7 @@ string getBetweenQuestionMakrs(const string &stringIn, int intIn = 1) {
     return stringIn.substr(firstMark + 1, secondMark - firstMark - 1);
 }
 
-string getOpFromConfigFile() {
-    string line = "";
-    ifstream config(configName);
-    if (config.is_open())
-        getline(config, line);
-    config.close();
-    return line;
 
-}
 
 void addLinesToStream(ofstream &outStream, ifstream &inStream, int number=1){
     string line;
@@ -416,156 +376,13 @@ int getLines(string nameOfFile = configName) {
 }
 
 
-int newUser(blockChain &blockChainIn) {
-
-    if (getLines() < 2 || getLines() > 4) {
-        outPutResults("Error!\nInvalid Information Passed in!");
-        return -1;
-    }
-
-    string publicKey = "";
-    string privateKey = "";
-    string userName = "";
-    fstream config(configName);
-    bool hasKeySet = false;
-    string line = "";
-
-
-    getline(config, line);
-    getline(config, line);
-
-    if (line.compare("true") == 0)
-        hasKeySet = true;
-    else if (line.compare("false") != 0) {
-        outPutResults("Error!\nInvalid Information Passed in!");
-        return -1;
-    }
-
-    getline(config, userName);
-    getline(config, publicKey);
 
 
 
-    user out;
-    //
-    if (hasKeySet) {
-
-        try {
-            out.setPublicKey(publicKey);
-        }
-        catch (string e) {
-            outPutResults("Error!\n" + static_cast<string>(e));
-            return 111;
-        }
-    } else {
-        privateKey = user::genPrivateKey();
-        out.genSetPublicKey(privateKey);
-    }
-
-    out.setBalance(0);
-
-    out.setUserName(userName);
-
-    blockChainIn.addToUserList(out);
-
-    stringstream stream;
-    stream << "Success!\nNew user created" << endl;
-    stream << "UserName: " << out.getUserName() << endl;
-    stream << "Public Key: " << out.getPublicKey() << endl;
-    stream << "Private Key: " << privateKey << endl;
-    stream << "Balance: " << out.getBalance() << endl;
-
-    outPutResults(stream.str());
-
-    return 0;
-
-}
-
-int newTrans(block &blockIn, blockChain &blockChainIn) {
-    if (getLines() != 5) {
-        outPutResults("Error!\nInvalid Information Passed in!");
-        return -1;
-    }
 
 
-    string senderKey = "";
-    string senderPrivateKey = "";
-    string amount="";
 
-    string receiverKey = "";
-
-    fstream config(configName);
-
-    string line = "";
-
-
-    getline(config, line);
-    getline(config, senderKey);
-    getline(config, senderPrivateKey);
-    getline(config, amount);
-    getline(config, receiverKey);
-
-
-    transaction out;
-
-    try {
-        out.setSenderKey(senderKey);
-        out.setSenderSig(user::genSignature(senderPrivateKey));
-        out.setReceiverKey(receiverKey);
-        out.setAmount(stoi(amount));
-    }
-    catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
-    }
-
-    try {
-        out.verifyTransaction(blockChainIn.getuserList());
-    }
-    catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
-    }
-    if (!blockChainIn.isPublicKeyInList(receiverKey))
-        blockChainIn.addToUserList(user(receiverKey));
-
-    out.setReceiverName(blockChainIn.getUserByPublicKey(receiverKey).getUserName());
-    out.setSenderName(blockChainIn.getUserByPublicKey(senderKey).getUserName());
-    blockIn.addTransaction(out);
-
-    stringstream stream;
-    stream << "Success!\nNew Transaction Created!" << endl;
-    stream << out;
-
-    outPutResults(stream.str());
-
-    return 0;
-}
-
-int mine(block &blockIn, blockChain &blockChainIn) {
-    ifstream config(configName);
-    string line;
-    string key;
-
-    skipLine(config);
-
-    getline(config, line);
-
-    key=getBetweenQuestionMakrs(line,2);
-
-
-    try {
-        string hash = blockChainIn.mine(blockIn, key);
-        outPutResults("Success!\nBlock Hash: " + hash);
-        blockIn=block();
-    }
-    catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
-    }
-}
-
-void writeBlockChain(const blockChain &blockChainIn) {
+void writeBlockChain(const BlockChain &blockChainIn) {
     ofstream out(blockChainFileName);
     if (out.is_open()) {
         out << "{" << endl;
@@ -576,7 +393,7 @@ void writeBlockChain(const blockChain &blockChainIn) {
 
 }
 
-void writeUsers(const blockChain &blockChainIn) {
+void writeUsers(const BlockChain &blockChainIn) {
 
     ofstream out(userFileName);
     if (out.is_open()) {
@@ -589,7 +406,7 @@ void writeUsers(const blockChain &blockChainIn) {
 
 }
 
-void writeUnminedBlock(const block &blockIn) {
+void writeUnminedBlock(const Block &blockIn) {
     ofstream out(unminedBlockFileName);
     if (out.is_open()) {
         out << "{" << endl;
