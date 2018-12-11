@@ -98,6 +98,7 @@ int Driver::newUser() {
         hasKeySet = true;
     else if (line.compare("false") != 0) {
         outPutResults("Error!\nImport Key boolean must be true or false");
+        config.close();
         return -1;
     }
 
@@ -114,6 +115,7 @@ int Driver::newUser() {
         }
         catch (string e) {
             outPutResults("Error!\n" + static_cast<string>(e));
+            config.close();
             return 111;
         }
     } else {
@@ -177,6 +179,7 @@ int Driver::newTrans() {
     }
     catch (string e) {
         outPutResults("Error!\n" + e);
+        config.close();
         return -1;
     }
 
@@ -185,6 +188,7 @@ int Driver::newTrans() {
     }
     catch (string e) {
         outPutResults("Error!\n" + e);
+        config.close();
         return -1;
     }
     if (!primaryChain.isPublicKeyInList(receiverKey))
@@ -235,6 +239,7 @@ int Driver::mine() {
     }
     catch (string e) {
         outPutResults("Error!\n" + e);
+        config.close();
         return -1;
     }
 }
