@@ -55,7 +55,7 @@ void printFile(string fileName);
 void loadData(Block &blockIn, BlockChain &blockChainIn);
 
 
-int loadBlockData(Block &blockIn, string inputFileName=unminedBlockFileName);
+int loadUnminedBlockData(Block &blockIn, string inputFileName=unminedBlockFileName);
 
 void loadBlockChainData(BlockChain &blockChainIn);
 
@@ -106,18 +106,33 @@ int main() {
 }
 
 void loadData(Block &blockIn, BlockChain &blockChainIn) {
-    if (getLines(unminedBlockFileName) > 0)
-        loadBlockData(blockIn);
+    if (getLines(unminedBlockFileName) > 0) {
+        try{
+        loadUnminedBlockData(blockIn);}
+        catch (string e)
+        {
+            outPutResults("Error!\n "+e);
+            exit(532);
+        }
+    }
 
     if (getLines(blockChainFileName) > 0)
-        loadBlockChainData(blockChainIn);
+    {
+        try{
+            loadBlockChainData(blockChainIn);}
+        catch (string e)
+        {
+            outPutResults("Error!\n "+e);
+            exit(570);
+        }
+    }
 
     if (getLines(userFileName) > 0) {
         loadUserData(blockChainIn);
     }
 }
 
-int loadBlockData(Block &blockIn, string inputFileName) {
+int loadUnminedBlockData(Block &blockIn, string inputFileName) {
     Block out = Block();
     string line = "";
     ifstream inputFile(inputFileName);
@@ -127,7 +142,10 @@ int loadBlockData(Block &blockIn, string inputFileName) {
     string prevBlockHash;
     string nonce;
     string numTransString;
-    int numTrans;
+    int numTransInt=0;
+    int blockNumInt=0;
+    int timeInt=0;
+    int nonceInt=301;
 
 
     skipLine(inputFile, 2);
@@ -155,29 +173,34 @@ int loadBlockData(Block &blockIn, string inputFileName) {
 
     try {
 
-        out.setBlockNumber(std::stoi(blockNum));
+        int numTransInt;
+        int blockNumInt=std::stoi(blockNum);
+        int timeInt=std::stoi(blockGenTime);
+        int nonceInt=stoi(nonce);
 
-        out.setTime(std::stoi(blockGenTime));
+        out.setBlockNumber(blockNumInt);
+
+        out.setTime(timeInt);
 
         out.setSelfHash(blockHash);
         out.setPrevHash(prevBlockHash);
 
-        out.setNonce(stoi(nonce));
+        out.setNonce(nonceInt);
 
-        numTrans = stoi(numTransString);
+        numTransInt = stoi(numTransString);
 
     }
 
     catch (exception e) {
 
-        outPutResults("Error!\n" + static_cast<string>(e.what()));
+        inputFile.close();
         if(inputFileName.compare(unminedBlockFileName)==0)
-        exit(201);
+            throw string("Problem loading in unmined block");
         else
-            exit(301);
+        throw string("Problem loading in blockChain");
     }
 
-    for (int i = 0; i < numTrans; i++) {
+    for (int i = 0; i < numTransInt; i++) {
         getline(inputFile, line);
         out.addTransaction(transFromString(line));
     }
@@ -244,15 +267,15 @@ void loadBlockChainData(BlockChain &blockChainIn) {
     try{
         numbBlocks=stoi(getBetweenQuestionMakrs(line, 2));
     } catch (exception e) {
-        outPutResults("Error!\n" + static_cast<string>(e.what()));
+
         exit(-125);
     }
 
+    remove("0temp.json");
 
-    for(int i=0; i<numbBlocks; i++){
-        builder=stringstream();
-        builder<<i<<tempFileName;
-        temp=ofstream(builder.str());
+    for(int i=1; i<=numbBlocks; i++){
+
+        temp=ofstream(to_string(i));
         tempBlock=Block();
         addLinesToStream(temp, inputFile, 9);
         getline(inputFile, line);
@@ -265,8 +288,16 @@ void loadBlockChainData(BlockChain &blockChainIn) {
         }
         temp.close();
 
+        try {
+            loadUnminedBlockData(tempBlock, to_string(i));
+        }
+        catch(string e){
+            inputFile.close();
 
-        loadBlockData(tempBlock, builder.str());
+
+            throw string(e+"\nThe error occurred on loading block: "+to_string(i));
+
+        }
 
         tempList.push_back(tempBlock);
         
