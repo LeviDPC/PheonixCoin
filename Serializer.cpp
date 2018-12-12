@@ -143,10 +143,12 @@ BlockChain Serializer::readBlockChain(const string &fileName) {
         catch (string e) {
             inputFile.close();
 
-
             throw string(e + "\nThe error occurred on loading block: " + to_string(i));
-
         }
+
+        builder=stringstream();
+        builder<<i;
+        remove(builder.str().c_str());
 
         tempList.push_back(tempBlock);
 
@@ -173,7 +175,7 @@ vector<user> Serializer::readUserList(const string &fileName){
     skipLine(inputFile, 4);
 
     getline(inputFile, line);
-    cout<<line;
+
 
 
     while (line.find("{")!=std::string::npos) {
@@ -200,7 +202,7 @@ vector<user> Serializer::readUserList(const string &fileName){
         temp.setUserName(userName);
         temp.setPublicKey(userKey);
         temp.setBalance(balance);
-        cout<<temp;
+        
         out.push_back(temp);
 
     }
