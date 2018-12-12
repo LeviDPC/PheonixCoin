@@ -52,18 +52,33 @@ void Driver::drive() {
     if (op.compare("newuser") == 0) {
 
         opPerformed = true;
-        newUser();
+
+        try{newUser();}
+        catch(string e)
+        {
+            throw("Error creating new user!\n"+e);
+        }
 
     }
 
     if (op.compare("newtrans") == 0) {
         opPerformed = true;
-        newTrans();
+        try{newTrans();}
+        catch(string e)
+        {
+            throw("Error creating new transaction!\n"+e);
+        }
     }
 
     if (op.compare("mine") == 0) {
         opPerformed = true;
-        mine();
+
+        try{mine();}
+        catch(string e)
+        {
+            throw("Error creating new transaction!\n"+e);
+        }
+
     }
 
 
@@ -142,6 +157,7 @@ int Driver::newUser() {
 
 
 int Driver::newTrans() {
+
     if (getLinesInConfig() != 5) {
         outPutResults("Error!\nInvalid Information Passed in!");
         return -1;
@@ -191,8 +207,15 @@ int Driver::newTrans() {
     if (!primaryChain.isPublicKeyInList(receiverKey))
         primaryChain.addToUserList(user(receiverKey));
 
+
     out.setReceiverName(primaryChain.getUserByPublicKey(receiverKey).getUserName());
-    out.setSenderName(primaryChain.getUserByPublicKey(senderKey).getUserName());
+    try {
+
+        out.setSenderName(primaryChain.getUserByPublicKey(senderKey).getUserName());
+    }
+    catch(string e)
+    {throw string("Problem with Sender Key!\n"+e);}
+
 
     if (out.getAmount() <= 0) {
 

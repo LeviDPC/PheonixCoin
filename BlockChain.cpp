@@ -105,7 +105,7 @@ void BlockChain::updateUsers(const Block &in) {
 // if the first parameter is less than or equal to the second one and false otherwise.
 // If the input is input is less than 64 digits than the ensureLength function will add 0s at the beelining of the
 // String. If it is more than it will just take the first 64 digits.
-bool hexComp(string in1, string in2) {
+bool BlockChain::hexComp(string in1, string in2) {
     //This next line is just for testing the function
     //cout<<endl<<"hexString: "<<hex1<<endl<<"miningThreshold: "<<hex2<<endl;
     string sec1 = "";
@@ -121,8 +121,14 @@ bool hexComp(string in1, string in2) {
     for (int i = 0; i < 8; i++) {
         sec1 = hex1.substr(i * 8, 8);
         sec2 = hex2.substr(i * 8, 8);
-        sec1Long = std::stoull(sec1, NULL, 16);
-        sec2Long = std::stoull(sec2, NULL, 16);
+        try {
+            sec1Long = std::stoull(sec1, NULL, 16);
+            sec2Long = std::stoull(sec2, NULL, 16);
+        }
+        catch(exception e)
+        {
+            throw string("Invalid Hex Number!");
+        }
         //These next two commented lines are just for testing the method.
         //cout<<endl<<"Sec1: "<<sec1<<endl<<"sec2: "<<sec2<<endl;
         //cout<<endl<<"Sec1Long: "<<sec1Long<<endl<<"sec2Long: "<<sec2Long<<endl;
@@ -142,14 +148,14 @@ bool hexComp(string in1, string in2) {
 }
 
 
-string ensureLength(string in) {
+string BlockChain::ensureLength(string in, int intIn) {
 
-    if (in.length() > 64) {
-        in = in.substr(0, 64);
+    if (in.length() > intIn) {
+        in = in.substr(0, intIn);
     }
-    if (in.length() < 64) {
+    if (in.length() < intIn) {
 
-        for (int i = 0; i < (64 - in.length()); i++) {
+        for (int i = 0; i < (intIn - in.length()); i++) {
             in = "0" + in;
 
         }
@@ -309,6 +315,7 @@ string BlockChain::userListJSONOutput(string whiteSpaceBeginning, string tag) co
 
 
 user& BlockChain::getUserByPublicKey(const string &publicKey) {
+
     vector<user>::iterator i;
     int index;
     stringstream stream;
@@ -320,12 +327,15 @@ user& BlockChain::getUserByPublicKey(const string &publicKey) {
         if (publicKey.compare(userList[index].getPublicKey()) == 0)
             return userList[index];
     }
-            user u("null", "null", -1);
-    throw string("User: "+publicKey+" not on List");
+
+
+    throw string("User: "+publicKey+" not on List!");
+
 ;
 }
 
 user& BlockChain::getUserByPublicKey(const string &publicKey, vector<user> &listIn){
+
     vector<user>::iterator i;
     int index;
     stringstream stream;
@@ -432,6 +442,23 @@ void BlockChain::addToUserByKey(const string &key, int intIn){
         if (key.compare(userList[index].getPublicKey()) == 0) {
             user temp=BlockChain::userList[index];
             int out=temp.getBalance()+intIn;
+            BlockChain::userList[index].setBalance(out);
+        }
+    }
+}
+
+void BlockChain::subtractFromUserByKey(const string &key, int intIn){
+    vector<user>::iterator i;
+    int index;
+    stringstream stream;
+    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+    for (i = BlockChain::userList.begin(); i != BlockChain::userList.end(); ++i) {
+        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
+        //then I can't be bothered
+        index = std::distance(BlockChain::userList.begin(), i);
+        if (key.compare(userList[index].getPublicKey()) == 0) {
+            user temp=BlockChain::userList[index];
+            int out=temp.getBalance()-intIn;
             BlockChain::userList[index].setBalance(out);
         }
     }

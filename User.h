@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <time.h>
+#include "picosha2.h"
 using namespace std;
 class user
 {

@@ -11,13 +11,17 @@
 #include <iostream>
 
 class BlockChain {
-    std::vector<Block> minedBlocks;
+private:
+	std::vector<Block> minedBlocks;
 	std::vector<user> userList;
     //default hash is the hash of "Levi is Awesome"
     string prevHash="6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC";
 
+
 public:
 	BlockChain(const vector<Block> &minedBlocks);
+
+    bool static hexComp(string in1, string in2);
 
     string toString() const;
 
@@ -46,24 +50,26 @@ public:
 	string userListToString() const;
 
 	string userListJSONOutput(string whiteSpaceBeginning="\t", string tag="\"userList\": ") const;
-//update uml
+
     user &getUserByPublicKey(const string &publicKey);
-// add to uml
+
     static user &getUserByPublicKey(const string &publicKey, vector<user> &listIn);
 
 	bool isPublicKeyInList(const string &publicKey) const;
-//add to uml
+
     static bool isPublicKeyInList(const string &publicKey, const vector<user> &listIn);
-//add to uml
+
 	void addUserIfNotExists(const string &publicKey);
-//add to uml
+
     static void addUserIfNotExists(string publicKey, vector<user> &listIn);
 
 	bool verifyTransactions(const Block &in) const;
-	//add to uml
+
 	void addToUserByKey(const string &key, int intIn);
-	//add to uml
-	void subractFromUserByKey(const string &key);
+
+	void subtractFromUserByKey(const string &key, int intIn);
+
+    string static ensureLength(string in, int intIn=64);
 
 };
 

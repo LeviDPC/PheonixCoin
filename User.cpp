@@ -131,14 +131,18 @@ string user::genPrivateKey(){
 string user::genSetPublicKey(const string &privateKeyIn){
 
 
-    string key=user::rand256Gen();
+    string key="";
+    string priv=privateKeyIn+"noise";
+    picosha2::hash256_hex_string(priv,key);
     user::publicKey=key;
     return key;
 }
 
 string user::genSignature(const string &privateKeyIn){
-    user temp;
-    return temp.rand256Gen();
+
+    string out="";
+    picosha2::hash256_hex_string(privateKeyIn,out);
+    return out;
 }
 
 string user::rand256Gen() {

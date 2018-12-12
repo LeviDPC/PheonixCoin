@@ -4,6 +4,9 @@
 
 #include "Serializer.h"
 
+Serializer::Serializer() {}
+
+
 Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
     Block out = Block();
     string line = "";
@@ -46,9 +49,18 @@ Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
     try {
 
          numTransInt;
-         blockNumInt = std::stoi(blockNum);
-         timeInt = std::stoi(blockGenTime);
-         nonceInt = stoi(nonce);
+
+         try {blockNumInt = std::stoi(blockNum);}
+         catch (exception e){throw string("Problem Reading BlockNum!");}
+
+        try {timeInt = std::stoi(blockGenTime);}
+        catch (exception e){throw string("Problem Reading BlockTime!");}
+
+        try {nonceInt = stoi(nonce);}
+        catch (exception e){throw string("Problem Reading Nonce!");}
+
+        try {numTransInt = stoi(numTransString);}
+        catch (exception e){throw string("Problem Reading Number of Transactions In Block!");}
 
         out.setBlockNumber(blockNumInt);
 
@@ -59,20 +71,20 @@ Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
 
         out.setNonce(nonceInt);
 
-        numTransInt = stoi(numTransString);
+
 
     }
 
-    catch (exception e) {
+    catch (string e) {
 
         inputFile.close();
         if (readingUnmined){
 
-            throw string("Problem loading in unmined block");
+            throw string("Problem loading in unmined block!\n"+e);
         }
         else {
 
-            throw string("Problem loading in blockChain");
+            throw string("Problem loading in blockChain!\n"+e);
         }
     }
 
@@ -161,6 +173,7 @@ vector<user> Serializer::readUserList(const string &fileName){
     skipLine(inputFile, 4);
 
     getline(inputFile, line);
+    cout<<line;
 
 
     while (line.find("{")!=std::string::npos) {
@@ -187,6 +200,7 @@ vector<user> Serializer::readUserList(const string &fileName){
         temp.setUserName(userName);
         temp.setPublicKey(userKey);
         temp.setBalance(balance);
+        cout<<temp;
         out.push_back(temp);
 
     }
@@ -194,6 +208,40 @@ vector<user> Serializer::readUserList(const string &fileName){
 
 
     return out;
+}
+
+
+void Serializer::write(const Block &unminedBlock, const string &fileName){
+    ofstream out(fileName);
+    if (out.is_open()) {
+        out << "{" << endl;
+        out << unminedBlock.JSONOutput() << endl;
+        out << "}";
+    }
+    out.close();
+}
+
+void Serializer::write(const BlockChain &primaryChain, const string &fileName){
+    ofstream out(fileName);
+    if (out.is_open()) {
+        out << "{" << endl;
+        out << primaryChain.JSONOutput();
+        out << "}";
+    }
+    out.close();
+}
+
+void Serializer::write(const vector<user> &userList, const string &fileName){
+    ofstream out(fileName);
+    BlockChain temp;
+    temp.setUserList(userList);
+    if (out.is_open()) {
+        out << "{" << endl;
+        out << temp.userListJSONOutput() << endl;
+        out << "}";
+    }
+    out.close();
+
 }
 
 Transaction Serializer::transFromString(const string &in) {
@@ -256,3 +304,4 @@ void Serializer::addLinesToStream(ofstream &outStream, ifstream &inStream, int n
     }
 
 }
+
