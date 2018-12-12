@@ -23,6 +23,7 @@
 #include "BlockChain.h"
 #include "User.h"
 #include "Driver.h"
+#include "Serializer.h"
 
 using namespace std;
 
@@ -61,28 +62,35 @@ void loadBlockChainData(BlockChain &blockChainIn);
 
 int loadUserData(BlockChain &blockChainIn);
 
-void skipLine(ifstream &, int = 1);
+void skipLineMain(ifstream &, int = 1);
 
-string getBetweenQuestionMakrs(const string &stringIn, int intIn);
+string getBetweenQuestionMarks(const string &stringIn, int intIn);
 
 Transaction transFromString(const string &in);
 
-void addLinesToStream(ofstream &outStream, ifstream &inStream, int number);
+void addLinesToStreamMainMain(ofstream &outStream, ifstream &inStream, int number);
 
 int runNumb=1;
 
 int main() {
     BlockChain primaryChain = BlockChain();
     Block unminedBlock = Block();
+    Serializer serializer;
+    Driver driver;
 
+    //loadData(unminedBlock, primaryChain);
 
-    loadData(unminedBlock, primaryChain);
+    unminedBlock=serializer.readBlock(unminedBlockFileName);
+    primaryChain=serializer.readBlockChain(blockChainFileName);
+    primaryChain.setUserList(serializer.readUserList(userFileName));
 
-    Driver driver(configName, resultFileName, unminedBlock, primaryChain);
+    driver =Driver(configName, resultFileName, unminedBlock, primaryChain);
 
     driver.drive();
 
     driver.outPut(unminedBlock, primaryChain);
+
+
 
 
 
@@ -148,28 +156,28 @@ int loadUnminedBlockData(Block &blockIn, string inputFileName) {
     int nonceInt=301;
 
 
-    skipLine(inputFile, 2);
+    skipLineMain(inputFile, 2);
 
     getline(inputFile, line);
-    blockNum = getBetweenQuestionMakrs(line, 2);
+    blockNum = getBetweenQuestionMarks(line, 2);
 
     getline(inputFile, line);
-    blockGenTime = getBetweenQuestionMakrs(line, 2);
+    blockGenTime = getBetweenQuestionMarks(line, 2);
 
     getline(inputFile, line);
-    blockHash = getBetweenQuestionMakrs(line, 2);
+    blockHash = getBetweenQuestionMarks(line, 2);
 
     getline(inputFile, line);
-    prevBlockHash = getBetweenQuestionMakrs(line, 2);
+    prevBlockHash = getBetweenQuestionMarks(line, 2);
 
     getline(inputFile, line);
-    nonce = getBetweenQuestionMakrs(line, 2);
+    nonce = getBetweenQuestionMarks(line, 2);
 
     getline(inputFile, line);
-    numTransString = getBetweenQuestionMakrs(line, 2);
+    numTransString = getBetweenQuestionMarks(line, 2);
 
 
-    skipLine(inputFile);
+    skipLineMain(inputFile);
 
     try {
 
@@ -197,7 +205,7 @@ int loadUnminedBlockData(Block &blockIn, string inputFileName) {
         if(inputFileName.compare(unminedBlockFileName)==0)
             throw string("Problem loading in unmined block");
         else
-        throw string("Problem loading in blockChain");
+            throw string("Problem loading in blockChain");
     }
 
     for (int i = 0; i < numTransInt; i++) {
@@ -222,13 +230,13 @@ Transaction transFromString(const string &in) {
 
 
 
-    string userName = getBetweenQuestionMakrs(line, 2);
-    string senderKey = getBetweenQuestionMakrs(line, 4);
-    string senderSig = getBetweenQuestionMakrs(line, 6);
-    string amount = getBetweenQuestionMakrs(line, 8);
-    string receiverName = getBetweenQuestionMakrs(line, 10);
-    string receiverKey = getBetweenQuestionMakrs(line, 12);
-    string time = getBetweenQuestionMakrs(line, 14);
+    string userName = getBetweenQuestionMarks(line, 2);
+    string senderKey = getBetweenQuestionMarks(line, 4);
+    string senderSig = getBetweenQuestionMarks(line, 6);
+    string amount = getBetweenQuestionMarks(line, 8);
+    string receiverName = getBetweenQuestionMarks(line, 10);
+    string receiverKey = getBetweenQuestionMarks(line, 12);
+    string time = getBetweenQuestionMarks(line, 14);
 
     try {
         out.setSenderName(userName);
@@ -260,12 +268,12 @@ void loadBlockChainData(BlockChain &blockChainIn) {
     string line;
     stringstream builder;
 
-    skipLine(inputFile,2);
+    skipLineMain(inputFile,2);
 
     getline(inputFile,line);
 
     try{
-        numbBlocks=stoi(getBetweenQuestionMakrs(line, 2));
+        numbBlocks=stoi(getBetweenQuestionMarks(line, 2));
     } catch (exception e) {
 
         exit(-125);
@@ -277,7 +285,7 @@ void loadBlockChainData(BlockChain &blockChainIn) {
 
         temp=ofstream(to_string(i));
         tempBlock=Block();
-        addLinesToStream(temp, inputFile, 9);
+        addLinesToStreamMainMain(temp, inputFile, 9);
         getline(inputFile, line);
 
         while(line.find("]")==string::npos){
@@ -319,7 +327,7 @@ int loadUserData(BlockChain &blockChainIn) {
     string userKey = "";
     int balance = 0;
 
-    skipLine(inputFile, 4);
+    skipLineMain(inputFile, 4);
 
     getline(inputFile, line);
 
@@ -327,22 +335,22 @@ int loadUserData(BlockChain &blockChainIn) {
     while (line.find("{")!=std::string::npos) {
 
         getline(inputFile, line);
-        userName = getBetweenQuestionMakrs(line, 2);
+        userName = getBetweenQuestionMarks(line, 2);
 
         getline(inputFile, line);
-        userKey = getBetweenQuestionMakrs(line, 2);
+        userKey = getBetweenQuestionMarks(line, 2);
 
         getline(inputFile, line);
 
         try {
-            balance = stoi(getBetweenQuestionMakrs(line, 2));
+            balance = stoi(getBetweenQuestionMarks(line, 2));
         }
         catch (string e) {
             outPutResults("Error!\n" + e);
             exit(-143);
         }
 
-        skipLine(inputFile);
+        skipLineMain(inputFile);
         getline(inputFile, line);
 
         temp.setUserName(userName);
@@ -359,13 +367,13 @@ int loadUserData(BlockChain &blockChainIn) {
 
 }
 
-void skipLine(ifstream &streamIn, int intIn) {
+void skipLineMain(ifstream &streamIn, int intIn) {
     string temp;
     for (int i = 0; i < intIn; i++)
         getline(streamIn, temp);
 }
 
-string getBetweenQuestionMakrs(const string &stringIn, int intIn = 1) {
+string getBetweenQuestionMarks(const string &stringIn, int intIn = 1) {
     int firstMark;
     int secondMark = -1;
     for (int i = 0; i < intIn; i++) {
@@ -377,7 +385,7 @@ string getBetweenQuestionMakrs(const string &stringIn, int intIn = 1) {
 
 
 
-void addLinesToStream(ofstream &outStream, ifstream &inStream, int number=1){
+void addLinesToStreamMainMain(ofstream &outStream, ifstream &inStream, int number=1){
     string line;
     for(int i=0; i<number; i++){
         getline(inStream, line);
