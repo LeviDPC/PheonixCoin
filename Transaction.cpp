@@ -141,10 +141,13 @@ void Transaction::setSenderKey(const string &senderKey) {
 }
 
 const string &Transaction::getSenderSig() const {
+
     return senderSig;
 }
 
 void Transaction::setSenderSig(const string &senderSig) {
+    if(!BlockChain::ensureHex(senderSig))
+        throw string("Sender Sig must Be valid Hex String");
     Transaction::senderSig = senderSig;
 }
 

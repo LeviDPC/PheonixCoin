@@ -73,6 +73,19 @@ Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
 
 
 
+
+
+    for (int i = 1; i <=numTransInt; i++) {
+        getline(inputFile, line);
+        try {
+            out.addTransaction(transFromString(line));
+        }
+        catch(string e){
+            throw string("Error Reading block on transaction: "+to_string(i)+" "+e);
+        }
+
+    }
+
     }
 
     catch (string e) {
@@ -86,11 +99,6 @@ Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
 
             throw string("Problem loading in blockChain!\n"+e);
         }
-    }
-
-    for (int i = 0; i < numTransInt; i++) {
-        getline(inputFile, line);
-        out.addTransaction(transFromString(line));
     }
 
     inputFile.close();
@@ -143,7 +151,7 @@ BlockChain Serializer::readBlockChain(const string &fileName) {
         catch (string e) {
             inputFile.close();
 
-            throw string(e + "\nThe error occurred on loading block: " + to_string(i));
+            throw string("Error occurred on loading block: " + to_string(i)+"! "+e);
         }
 
         builder=stringstream();
@@ -193,14 +201,15 @@ vector<user> Serializer::readUserList(const string &fileName){
         }
         catch (exception e) {
             inputFile.close();
-            throw string("Error Loading user Data From File\nInvalid user balance!");
+            throw string("Error Loading user Data From File! Balance: "+getBetweenQuestionMarks(line, 2)+" is Invalid!");
         }
 
         skipLine(inputFile);
         getline(inputFile, line);
 
         temp.setUserName(userName);
-        temp.setPublicKey(userKey);
+        try{temp.setPublicKey(userKey);}
+        catch (string e){throw string("Error Reading User List From File! User Key: "+userKey+" Is Invalid! "+e);}
         temp.setBalance(balance);
         
         out.push_back(temp);
@@ -260,20 +269,31 @@ Transaction Serializer::transFromString(const string &in) {
     string receiverKey = getBetweenQuestionMarks(line, 12);
     string time = getBetweenQuestionMarks(line, 14);
 
-    try {
-        out.setSenderName(userName);
-        out.setSenderKey(senderKey);
-        out.setSenderSig(senderSig);
+
+    out.setSenderName(userName);
+
+
+    try {out.setSenderKey(senderKey);}
+    catch (string e){throw string("Error Loading Sender Key from Transaction");}
+
+
+    try {out.setSenderSig(senderSig);}
+    catch (string e){throw string("Error Loading Sender Key from Transaction");}
+
         out.setReceiverName(receiverName);
-        out.setReceiverKey(receiverKey);
 
-        out.setAmount(stoi(amount)); //this method is throwing the error
 
-        out.setManTime(stoi(time));
-    }
-    catch (exception e) {
-        throw string("error reading transaction data!");
-    }
+    try {out.setReceiverKey(receiverKey);}
+    catch (string e){throw string("Error Loading Receiver Key from Transaction");}
+
+
+    try {out.setAmount(stoi(amount));}
+    catch (exception e){throw string("Error Loading Amount from Transaction");}
+
+
+    try {out.setManTime(stoi(time));}
+    catch (exception e){throw string("Error Loading Time from Transaction");}
+
 
     return out;
 
@@ -305,5 +325,16 @@ void Serializer::addLinesToStream(ofstream &outStream, ifstream &inStream, int n
 
     }
 
+}
+
+void Serializer::outPutResultsError(const string &in, const string &resultFileName) {
+    ofstream result(resultFileName);
+    if (result.is_open()){
+        result<<"{"<<endl;
+        result<<"\t\"Status\" : \"Error!\","<<endl;
+        result<<"\t\"Error\" : \""<<in<<"\""<<endl;
+        result<<"}";
+    }
+    result.close();
 }
 

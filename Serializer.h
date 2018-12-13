@@ -33,7 +33,7 @@ public:
     string getBetweenQuestionMarks(const string &stringIn, int intIn);
     void skipLine(ifstream &streamIn, int intIn=1);
     void addLinesToStream(ofstream &outStream, ifstream &inStream, int number);
-
+    void outPutResultsError(const string &in, const string &resultFileName);
 
 };
 

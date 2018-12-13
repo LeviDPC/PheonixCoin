@@ -95,8 +95,13 @@ void Driver::drive() {
 
 
     if (op.compare("run") == 0) {
+        stringstream stream;
         opPerformed = true;
-        outPutResultsError("Program Run");
+        stream<<"{"<<endl;
+        stream << "\t\"status\" : \"Success!\","<<endl;
+        stream<<"\t\"operation\" : \"Program Ran!\"" << endl;
+        stream <<"}";
+        outPutResults(stream.str());
     }
 
     if (opPerformed == false)

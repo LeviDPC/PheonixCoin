@@ -32,7 +32,7 @@ using namespace std;
 
 int main() {
     string configName = "cppConfig.txt";
-    string resultFileName = "result.txt";
+    string resultFileName = "result.json";
     string userFileName = "users.json";
     string unminedBlockFileName = "unminedBlock.json";
     string blockChainFileName = "blockchain.json";
@@ -55,7 +55,8 @@ int main() {
 
     }
     catch(string e){
-        driver.outPutResultsError(e);
+        serializer.outPutResultsError(e, resultFileName);
+        exit(-101);
     }
 
 
