@@ -6,86 +6,136 @@
 #include "BlockChain.h"
 
 string Transaction::getSelfHash() const {
-    string out="";
-    picosha2::hash256_hex_string(Transaction::toStringWithoutHash(),out);
+    string out = "";
+    picosha2::hash256_hex_string(Transaction::toStringWithoutHash(), out);
 
     return out;
 
 
 }
 
-string Transaction::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) const{
+string Transaction::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) const {
     stringstream stream;
     string whiteSpaceEnd;
 
-    if(multiLine)
-        whiteSpaceEnd="\n";
+    if (multiLine)
+        whiteSpaceEnd = "\n";
     else
-        whiteSpaceEnd="";
-    string whiteSpaceBeginningWithoutAddedTab=whiteSpaceBeginning;
-    if(multiLine) {whiteSpaceBeginning+="\t";}
+        whiteSpaceEnd = "";
+    string whiteSpaceBeginningWithoutAddedTab = whiteSpaceBeginning;
+    if (multiLine) { whiteSpaceBeginning += "\t"; }
 
-    stream<<whiteSpaceBeginningWithoutAddedTab<<tag<<"{"<<whiteSpaceEnd;
+    stream << whiteSpaceBeginningWithoutAddedTab << tag << "{" << whiteSpaceEnd;
 
-    stream<<whiteSpaceBeginning<<"\"senderName\": \""<<Transaction::senderName<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"senderKey\": \""<<Transaction::senderKey<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"senderSig\": \""<<Transaction::senderSig<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"amount\": \""<<Transaction::amount<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"receiverName\": \""<<Transaction::receiverName<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"receiverKey\": \""<<Transaction::receiverKey<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"time\": \""<<Transaction::time<<"\""<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginningWithoutAddedTab<<"}";
+    stream << whiteSpaceBeginning << "\"senderName\": \"" << Transaction::senderName << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"senderKey\": \"" << Transaction::senderKey << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"senderSig\": \"" << Transaction::senderSig << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"amount\": \"" << Transaction::amount << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"receiverName\": \"" << Transaction::receiverName << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"receiverKey\": \"" << Transaction::receiverKey << "\"," << whiteSpaceEnd;
+    stream << whiteSpaceBeginning << "\"time\": \"" << Transaction::time << "\"" << whiteSpaceEnd;
+    stream << whiteSpaceBeginningWithoutAddedTab << "}";
     return stream.str();
 }
 
 string Transaction::toString() const {
     stringstream stream;
-    stream<<"Sender Name: "<<Transaction::senderName<<"\nSender Key: "<<Transaction::senderKey<<"\nSender Signature: "<<senderSig<<"\nAmount: "<<Transaction::amount;
-    stream<<"\nReceiver Name: "<<Transaction::receiverName<<"\nReceiver Key: "<<Transaction::receiverKey<<"\nTime: "<<Transaction::time<<endl;
-    stream<<"Transaction Hash: "<<getSelfHash();
+    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
+           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
+    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
+           << "\nTime: " << Transaction::time << endl;
+    stream << "Transaction Hash: " << getSelfHash();
     return stream.str();
 }
 
 string Transaction::toStringWithoutHash() const {
     stringstream stream;
-    stream<<"Sender Name: "<<Transaction::senderName<<"\nSender Key: "<<Transaction::senderKey<<"\nSender Signature: "<<senderSig<<"\nAmount: "<<Transaction::amount;
-    stream<<"\nReceiver Name: "<<Transaction::receiverName<<"\nReceiver Key: "<<Transaction::receiverKey<<"\nTime: "<<Transaction::time<<endl;
+    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
+           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
+    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
+           << "\nTime: " << Transaction::time << endl;
     return stream.str();
 }
 
-ostream & operator<<(ostream & stream, const Transaction & in)
-{
-	stream << in.toString();
-	return stream;
+ostream &operator<<(ostream &stream, const Transaction &in) {
+    stream << in.toString();
+    return stream;
+}
+
+istream &operator>>(istream &stream, Transaction &in){
+    string senderUserName="";
+    string senderKey = "";
+    string senderPrivateKey = "";
+    string receiverName="";
+    string receiverKey = "";
+    int amount=0;
+
+    cout<<"Please input a the sender's UserName: ";
+    stream>>senderUserName;
+    in.setSenderName(senderUserName);
+    cout<<endl;
+
+    cout<<"Please input a the sender's Public Key: ";
+    stream>>senderKey;
+    in.setSenderKey(senderKey);
+    cout<<endl;
+
+    cout<<"Please input the sender's Private Key: ";
+    stream>>senderPrivateKey;
+    cout<<endl;
+    in.setSenderSig(User::genSignature(senderPrivateKey));
+
+    cout<<"Please input ammount being sent: ";
+    stream>>amount;
+    in.setAmount(amount);
+    cout<<endl;
+
+    cout<<"Please input the receiver's UserName: ";
+    stream>>receiverName;
+    in.setReceiverName(receiverName);
+    cout<<endl;
+
+    cout<<"Please input the receiver's Public Key: ";
+    stream>>receiverKey;
+    in.setReceiverKey(receiverKey);
+    cout<<endl;
+
+    in.setAutoTime();
+
+
+
+    return stream;
+
 }
 
 
 Transaction::Transaction() {}
 
 Transaction::Transaction(const string &senderKey, const string &senderSig, int amount, const string &receiverKey) {
-    if(!BlockChain::ensureHex(senderKey))
+    if (!BlockChain::ensureHex(senderKey))
         throw string("Sender Key must Be valid Hex String");
-    if(!BlockChain::ensureHex(receiverKey))
+    if (!BlockChain::ensureHex(receiverKey))
         throw string("Receiver Key must Be valid Hex String");
-    Transaction::senderKey=senderKey;
-    Transaction::senderSig=senderSig;
-    Transaction::amount=amount;
-    Transaction::receiverKey=receiverKey;
-    Transaction::time=std::time(NULL);
+    Transaction::senderKey = senderKey;
+    Transaction::senderSig = senderSig;
+    Transaction::amount = amount;
+    Transaction::receiverKey = receiverKey;
+    Transaction::time = std::time(NULL);
 }
 
-Transaction::Transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount, const string &recieverName, const string &receiverKey) {
-    if(!BlockChain::ensureHex(senderKey))
+Transaction::Transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount,
+                         const string &recieverName, const string &receiverKey) {
+    if (!BlockChain::ensureHex(senderKey))
         throw string("Sender Key must Be valid Hex String");
-    if(!BlockChain::ensureHex(receiverKey))
+    if (!BlockChain::ensureHex(receiverKey))
         throw string("Receiver Key must Be valid Hex String");
-    Transaction::senderName=senderName;
-    Transaction::senderKey=senderKey;
-    Transaction::senderSig=senderSig;
-    Transaction::amount=amount;
-    Transaction::receiverName=recieverName;
-    Transaction::receiverKey=receiverKey;
-    Transaction::time=std::time(NULL);
+    Transaction::senderName = senderName;
+    Transaction::senderKey = senderKey;
+    Transaction::senderSig = senderSig;
+    Transaction::amount = amount;
+    Transaction::receiverName = recieverName;
+    Transaction::receiverKey = receiverKey;
+    Transaction::time = std::time(NULL);
 }
 
 
@@ -96,7 +146,6 @@ int Transaction::getBlockNumber() const {
 void Transaction::setBlockNumber(int blockNumber) {
     Transaction::blockNumber = blockNumber;
 }
-
 
 
 double Transaction::getAmount() const {
@@ -116,7 +165,7 @@ void Transaction::setManTime(time_t time) {
 }
 
 void Transaction::setAutoTime() {
-    Transaction::time=std::time(NULL);
+    Transaction::time = std::time(NULL);
 }
 
 const string &Transaction::getSenderName() const {
@@ -133,9 +182,9 @@ const string &Transaction::getSenderKey() const {
 }
 
 void Transaction::setSenderKey(const string &senderKey) {
-    if(senderKey.compare("")==0)
+    if (senderKey.compare("") == 0)
         throw string("Valid input is required for Sender Key");
-    if(!BlockChain::ensureHex(senderKey))
+    if (!BlockChain::ensureHex(senderKey))
         throw string("Sender Key must Be valid Hex String");
     Transaction::senderKey = senderKey;
 }
@@ -146,7 +195,7 @@ const string &Transaction::getSenderSig() const {
 }
 
 void Transaction::setSenderSig(const string &senderSig) {
-    if(!BlockChain::ensureHex(senderSig))
+    if (!BlockChain::ensureHex(senderSig))
         throw string("Sender Sig must Be valid Hex String");
     Transaction::senderSig = senderSig;
 }
@@ -165,16 +214,16 @@ const string &Transaction::getReceiverKey() const {
 }
 
 void Transaction::setReceiverKey(const string &receiverKey) {
-    if(receiverKey.compare("")==0)
+    if (receiverKey.compare("") == 0)
         throw string("Valid input is required for Receiver Key");
     Transaction::receiverKey = receiverKey;
 }
 
-bool Transaction::verifySignature() const{
+bool Transaction::verifySignature() const {
     return true;
 }
 
-bool Transaction::verifyTransaction(const vector<user> &userListIn){
+bool Transaction::verifyTransaction(const vector<User> &userListIn) {
     return true;
 }
 

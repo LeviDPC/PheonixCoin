@@ -36,29 +36,24 @@ string BlockChain::mine(Block blockIn, const string &key) {
 
 
     while (true) {
-        //mining Threshold is a variable that the mined hash is check against. This is currently set to.
-        //Using non hex formats may result in non intended results
 
-        //string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
         time_t curTime = time(NULL);
         srand(curTime);
         int nonce = rand();
-        //blockIn.addTransaction(Transaction("Pheonix Gen", 50, "Levi Pfantz"));
+
 
         string hash = blockIn.genHash(curTime, BlockChain::prevHash, nonce);
 
 
-        //checks if the hash is less than the value of miningThreshold
+
         if (hexComp(static_cast<string>(hash), miningThreshold)) {
-            // This line is just for testing purposes
-            // if(BlockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+
 
             blockIn.setBlockNumber(BlockChain::minedBlocks.size() + 1);
             blockIn.setTime(curTime);
             blockIn.setPrevHash(BlockChain::prevHash);
             blockIn.setSelfHash(hash);
             blockIn.setNonce(nonce);
-            //
 
 
             addUserIfNotExists(key);
@@ -87,10 +82,9 @@ void BlockChain::updateUsers(const Block &in) {
     Transaction trans;
 
 
-    //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
+
     for (i = in.getTransactions().begin(); i != in.getTransactions().end(); ++i) {
-        //based on my research I am pretty sure there are better ways to iterate through a vector, but if this works
-        //then I can't be bothered
+
         index = std::distance(in.getTransactions().begin(), i);
         trans = in.getTransactions()[index];
 
@@ -224,6 +218,45 @@ ostream &operator<<(ostream &stream, const BlockChain &in) {
     return stream;
 }
 
+istream &operator>>(istream &stream, BlockChain &in){
+    int userNum=0;
+    int blockNum=0;
+
+    vector<User> tempUserList;
+    vector<Block> tempBlockList;
+
+    Block tempBlock;
+    User tempUser;
+
+    cout<<"Please input how many users you would like to enter: ";
+    stream>>userNum;
+    cout<<endl;
+
+    for(int i=0; i<userNum; i++){
+        tempUser=User();
+        stream>>tempUser;
+        tempUserList.push_back(tempUser);
+    }
+
+    in.setUserList(tempUserList);
+
+    cout<<"Please input how many blocks you would like to enter: ";
+    stream>>blockNum;
+    cout<<endl;
+
+    for(int i=0; i<blockNum; i++){
+        tempBlock=Block();
+        stream>>tempBlock;
+        tempBlockList.push_back(tempBlock);
+    }
+
+    in.setMinedBlocks(tempBlockList);
+
+
+    return stream;
+
+}
+
 
 const Block &BlockChain::getBlockFromChain(int in) const {
 
@@ -240,15 +273,15 @@ void BlockChain::setMinedBlocks(const vector<Block> &minedBlocks) {
 }
 
 
-const vector<user> &BlockChain::getuserList() const {
+const vector<User> &BlockChain::getuserList() const {
     return userList;
 }
 
-void BlockChain::setUserList(const vector<user> &listIn) {
+void BlockChain::setUserList(const vector<User> &listIn) {
     BlockChain::userList = listIn;
 }
 
-void BlockChain::addToUserList(const user &in) {
+void BlockChain::addToUserList(const User &in) {
     if (in.getPublicKey().compare("-1") == 0 || BlockChain::isPublicKeyInList(in.getPublicKey()))
         throw string("Public Key Already in Use");
     BlockChain::userList.push_back(in);
@@ -257,7 +290,7 @@ void BlockChain::addToUserList(const user &in) {
 string BlockChain::userListToString() const {
     if (BlockChain::userList.size() < 1)
         return "";
-    vector<user>::const_iterator i;
+    vector<User>::const_iterator i;
     int index;
     stringstream stream;
 
@@ -278,7 +311,7 @@ string BlockChain::userListToString() const {
 
 
 string BlockChain::userListJSONOutput(string whiteSpaceBeginning, string tag) const {
-    vector<user>::const_iterator i;
+    vector<User>::const_iterator i;
     int index;
     stringstream stream;
 
@@ -291,7 +324,7 @@ string BlockChain::userListJSONOutput(string whiteSpaceBeginning, string tag) co
 
     stream << whiteSpaceBeginning << "\"numbOfUser\": \"" << BlockChain::userList.size() << "\"," << whiteSpaceEnd;
 
-    stream << whiteSpaceBeginning << "\"user\": [";
+    stream << whiteSpaceBeginning << "\"User\": [";
     if (userList.size() > 0)
         stream << whiteSpaceEnd;
 
@@ -317,9 +350,9 @@ string BlockChain::userListJSONOutput(string whiteSpaceBeginning, string tag) co
 }
 
 
-user& BlockChain::getUserByPublicKey(const string &publicKey) {
+User& BlockChain::getUserByPublicKey(const string &publicKey) {
 
-    vector<user>::iterator i;
+    vector<User>::iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -337,9 +370,9 @@ user& BlockChain::getUserByPublicKey(const string &publicKey) {
 ;
 }
 
-user& BlockChain::getUserByPublicKey(const string &publicKey, vector<user> &listIn){
+User& BlockChain::getUserByPublicKey(const string &publicKey, vector<User> &listIn){
 
-    vector<user>::iterator i;
+    vector<User>::iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -355,7 +388,7 @@ user& BlockChain::getUserByPublicKey(const string &publicKey, vector<user> &list
 }
 
 bool BlockChain::isPublicKeyInList(const string &publicKey) const {
-    vector<user>::const_iterator i;
+    vector<User>::const_iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -370,8 +403,8 @@ bool BlockChain::isPublicKeyInList(const string &publicKey) const {
     return false;
 }
 
-bool BlockChain::isPublicKeyInList(const string &publicKey, const vector<user> &listIn) {
-    vector<user>::const_iterator i;
+bool BlockChain::isPublicKeyInList(const string &publicKey, const vector<User> &listIn) {
+    vector<User>::const_iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -392,14 +425,14 @@ void BlockChain::addUserIfNotExists(const string &publicKey) {
     }
 }
 
-void BlockChain::addUserIfNotExists(string publicKey, vector<user> &listIn){
+void BlockChain::addUserIfNotExists(string publicKey, vector<User> &listIn){
     if (!BlockChain::isPublicKeyInList(publicKey, listIn)) {
         listIn.push_back(publicKey);
     }
 }
 
 bool BlockChain::verifyTransactions(const Block &in) const {
-    vector<user> tempUserList=BlockChain::userList;
+    vector<User> tempUserList=BlockChain::userList;
     vector<Transaction>::const_iterator i;
     int index;
     Transaction trans;
@@ -434,7 +467,7 @@ bool BlockChain::verifyTransactions(const Block &in) const {
 }
 
 void BlockChain::addToUserByKey(const string &key, int intIn){
-    vector<user>::iterator i;
+    vector<User>::iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -443,7 +476,7 @@ void BlockChain::addToUserByKey(const string &key, int intIn){
         //then I can't be bothered
         index = std::distance(BlockChain::userList.begin(), i);
         if (key.compare(userList[index].getPublicKey()) == 0) {
-            user temp=BlockChain::userList[index];
+            User temp=BlockChain::userList[index];
             int out=temp.getBalance()+intIn;
             BlockChain::userList[index].setBalance(out);
         }
@@ -451,7 +484,7 @@ void BlockChain::addToUserByKey(const string &key, int intIn){
 }
 
 void BlockChain::subtractFromUserByKey(const string &key, int intIn){
-    vector<user>::iterator i;
+    vector<User>::iterator i;
     int index;
     stringstream stream;
     //apparently using ++i is best practice? I'm not going ot worry about right now assuming the code works
@@ -460,7 +493,7 @@ void BlockChain::subtractFromUserByKey(const string &key, int intIn){
         //then I can't be bothered
         index = std::distance(BlockChain::userList.begin(), i);
         if (key.compare(userList[index].getPublicKey()) == 0) {
-            user temp=BlockChain::userList[index];
+            User temp=BlockChain::userList[index];
             int out=temp.getBalance()-intIn;
             BlockChain::userList[index].setBalance(out);
         }

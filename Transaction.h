@@ -69,7 +69,7 @@ public:
 	string toStringWithoutHash() const;
 
 	friend ostream& operator<< (ostream& stream, const Transaction& in);
-
+	friend istream& operator>> (istream& stream, Transaction& in);
 
 	int getBlockNumber() const;
 
@@ -88,7 +88,7 @@ public:
 
     bool verifySignature() const;
 
-    bool verifyTransaction(const vector<user> &userListIn);
+    bool verifyTransaction(const vector<User> &userListIn);
 
 };
 

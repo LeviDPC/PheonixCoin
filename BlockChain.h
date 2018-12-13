@@ -12,22 +12,24 @@
 
 class BlockChain {
 private:
-	std::vector<Block> minedBlocks;
-	std::vector<user> userList;
+    std::vector<Block> minedBlocks;
+    std::vector<User> userList;
     //default hash is the hash of "Levi is Awesome"
-    string prevHash="6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC";
+    string prevHash = "6C2671C57AA36868264BC533BA9EFF0A6E4AC802646DF1188201308F1DE374EC";
 
 
 public:
-	BlockChain(const vector<Block> &minedBlocks);
+    BlockChain(const vector<Block> &minedBlocks);
 
     bool static hexComp(string in1, string in2);
 
     string toString() const;
 
-	string JSONOutput(string whiteSpaceBeginning="\t", string tag="\"BlockChain\": ") const;
+    string JSONOutput(string whiteSpaceBeginning = "\t", string tag = "\"BlockChain\": ") const;
 
-	friend ostream& operator<< (ostream& stream, const BlockChain& in);
+    friend ostream &operator<<(ostream &stream, const BlockChain &in);
+
+    friend istream &operator>>(istream &stream, BlockChain &in);
 
     BlockChain();
 
@@ -37,41 +39,42 @@ public:
 
     const Block &getBlockFromChain(int in) const;
 
-	const vector<Block> &getMinedBlocks() const;
+    const vector<Block> &getMinedBlocks() const;
 
-	void setMinedBlocks(const vector<Block> &minedBlocks);
+    void setMinedBlocks(const vector<Block> &minedBlocks);
 
-	const vector<user> &getuserList() const;
+    const vector<User> &getuserList() const;
 
-	void setUserList(const vector<user> &listIn);
+    void setUserList(const vector<User> &listIn);
 
-	void addToUserList(const user &in);
+    void addToUserList(const User &in);
 
-	string userListToString() const;
+    string userListToString() const;
 
-	string userListJSONOutput(string whiteSpaceBeginning="\t", string tag="\"userList\": ") const;
+    string userListJSONOutput(string whiteSpaceBeginning = "\t", string tag = "\"userList\": ") const;
 
-    user &getUserByPublicKey(const string &publicKey);
+    User &getUserByPublicKey(const string &publicKey);
 
-    static user &getUserByPublicKey(const string &publicKey, vector<user> &listIn);
+    static User &getUserByPublicKey(const string &publicKey, vector<User> &listIn);
 
-	bool isPublicKeyInList(const string &publicKey) const;
+    bool isPublicKeyInList(const string &publicKey) const;
 
-    static bool isPublicKeyInList(const string &publicKey, const vector<user> &listIn);
+    static bool isPublicKeyInList(const string &publicKey, const vector<User> &listIn);
 
-	void addUserIfNotExists(const string &publicKey);
+    void addUserIfNotExists(const string &publicKey);
 
-    static void addUserIfNotExists(string publicKey, vector<user> &listIn);
+    static void addUserIfNotExists(string publicKey, vector<User> &listIn);
 
-	bool verifyTransactions(const Block &in) const;
+    bool verifyTransactions(const Block &in) const;
 
-	void addToUserByKey(const string &key, int intIn);
+    void addToUserByKey(const string &key, int intIn);
 
-	void subtractFromUserByKey(const string &key, int intIn);
+    void subtractFromUserByKey(const string &key, int intIn);
 
-    string static ensureLength(string in, int intIn=64);
+    string static ensureLength(string in, int intIn = 64);
 
-	static bool ensureHex(const string &in);
+    static bool ensureHex(const string &in);
+
 
 };
 

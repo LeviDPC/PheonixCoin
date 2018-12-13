@@ -2,74 +2,74 @@
 #include "BlockChain.h"
 
 
-user::user(){}
+User::User(){}
 
-user::user(string userName, string publicKey, long balance) {
+User::User(string userName, string publicKey, long balance) {
     if(!BlockChain::ensureHex(publicKey))
         throw string("Public Key must be a Valid Hex Number");
 
-    user::userName = userName;
-    user::publicKey=publicKey;
-    user::balance = balance;
+    User::userName = userName;
+    User::publicKey=publicKey;
+    User::balance = balance;
 
 }
 
-user::user(string publicKey, long balance) {
+User::User(string publicKey, long balance) {
     if(!BlockChain::ensureHex(publicKey))
         throw string("Public Key must be a Valid Hex Number");
-    user::userName = "";
-    user::publicKey=publicKey;
-    user::balance = balance;
+    User::userName = "";
+    User::publicKey=publicKey;
+    User::balance = balance;
 
 }
 
-user::user(string publicKey) {
-    user::userName = "";
-    user::publicKey=publicKey;
-    user::balance = 0;
+User::User(string publicKey) {
+    User::userName = "";
+    User::publicKey=publicKey;
+    User::balance = 0;
 
 }
 
-string user::getUserName() const {
-	return user::userName;
+string User::getUserName() const {
+	return User::userName;
 }
 
-string user::getPublicKey() const {
-	return user::publicKey;
+string User::getPublicKey() const {
+	return User::publicKey;
 }
 
-long user::getBalance() const {
-	return user::balance;
+long User::getBalance() const {
+	return User::balance;
 }
 
-void user::setUserName(string in) {
-	user::userName = in;
+void User::setUserName(string in) {
+	User::userName = in;
 }
 
-void user::setPublicKey(string in) {
+void User::setPublicKey(string in) {
     if(in.compare("")==0)
         throw string("Valid input is required for Public Key");
 
     if(!BlockChain::ensureHex(in))
         throw string("Public Key must be a Valid Hex Number");
-    user::publicKey = in;
+    User::publicKey = in;
 }
 
-void user::setBalance(long in) {
-	user::balance = in;
+void User::setBalance(long in) {
+	User::balance = in;
 }
 
-void user::addToBalance(long in) {
-    //cout<<"HEllow from user.cpp: "<<user::balance<<endl;
-	user::balance += in;
-	//cout<<"HEllow from user.cpp: "<<user::balance<<endl;
+void User::addToBalance(long in) {
+    //cout<<"HEllow from User.cpp: "<<User::balance<<endl;
+	User::balance += in;
+	//cout<<"HEllow from User.cpp: "<<User::balance<<endl;
 }
 
-void user::subtractFromBalance(long in) {
-	user::balance -= in;
+void User::subtractFromBalance(long in) {
+	User::balance -= in;
 }
 
-string user::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) const{
+string User::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) const{
     stringstream stream;
     string whiteSpaceEnd;
 
@@ -88,9 +88,9 @@ string user::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) 
 
 
 
-    stream<<whiteSpaceBeginning<<"\"userName\": \""<<user::userName<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"userKey\": \""<<user::publicKey<<"\","<<whiteSpaceEnd;
-    stream<<whiteSpaceBeginning<<"\"balance\": \""<<user::balance<<"\""<<whiteSpaceEnd;
+    stream<<whiteSpaceBeginning<<"\"userName\": \""<<User::userName<<"\","<<whiteSpaceEnd;
+    stream<<whiteSpaceBeginning<<"\"userKey\": \""<<User::publicKey<<"\","<<whiteSpaceEnd;
+    stream<<whiteSpaceBeginning<<"\"balance\": \""<<User::balance<<"\""<<whiteSpaceEnd;
     if(tag.compare("")!=0)
         stream << whiteSpaceBeginningWithoutAddedTab << "}";
     else
@@ -98,56 +98,81 @@ string user::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) 
     return stream.str();
 }
 
-string user::toString() const{
+string User::toString() const{
 	stringstream stream;
-	stream << "Username: " << user::userName<<endl;
-	stream << " Public Key: " << user::publicKey<<endl;
-	stream << " Balance: " << user::balance<<endl;
+	stream << "Username: " << User::userName<<endl;
+	stream << " Public Key: " << User::publicKey<<endl;
+	stream << " Balance: " << User::balance<<endl;
 	return stream.str();
 }
 
-ostream &operator<<(ostream &stream, const user &in)
+ostream &operator<<(ostream &stream, const User &in)
 {
 	stream << in.toString();
 	return stream;
 }
 
-bool user::operator>(const user &in)
-{
-	return user::balance > in.getBalance();
+istream &operator>>(istream &stream, User &in){
+    string UserName="";
+    string publicKey = "";
+    int balance=0;
+
+    cout<<"Please input a the UserName: ";
+    stream>>UserName;
+    in.setUserName(UserName);
+    cout<<endl;
+
+    cout<<"Please input a the Public Key: ";
+    stream>>publicKey;
+    in.setPublicKey(publicKey);
+    cout<<endl;
+
+    cout<<"Please input the User's Balance: ";
+    stream>>balance;
+    in.setBalance(balance);
+    cout<<endl;
+
+    return stream;
+
 }
 
-bool user::operator<(const user &in)
+
+bool User::operator>(const User &in)
 {
-	return user::balance < in.getBalance();
+	return User::balance > in.getBalance();
 }
 
-user& user::operator +=(const long &in){
+bool User::operator<(const User &in)
+{
+	return User::balance < in.getBalance();
+}
+
+User& User::operator +=(const long &in){
 	this->balance+=in;
 	return *this;
 	}
 
-user& user::operator -=(const long &in) {
+User& User::operator -=(const long &in) {
     this->balance-=in;
     return *this;
 }
 
 
-string user::genPrivateKey(){
+string User::genPrivateKey(){
    return rand256Gen();
 }
 
-string user::genSetPublicKey(const string &privateKeyIn){
+string User::genSetPublicKey(const string &privateKeyIn){
 
 
     string key="";
     string priv=privateKeyIn+"noise";
     picosha2::hash256_hex_string(priv,key);
-    user::publicKey=key;
+    User::publicKey=key;
     return key;
 }
 
-string user::genSignature(const string &privateKeyIn){
+string User::genSignature(const string &privateKeyIn){
     if(!BlockChain::ensureHex(privateKeyIn))
         throw string("Private Key must be a Valid Hex Number");
     if(privateKeyIn.compare("")==0)
@@ -157,7 +182,7 @@ string user::genSignature(const string &privateKeyIn){
     return out;
 }
 
-string user::rand256Gen() {
+string User::rand256Gen() {
     int random = 0;
     stringstream out;
     for (int i = 0; i < 64; i++) {

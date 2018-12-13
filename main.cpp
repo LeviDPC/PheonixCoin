@@ -1,24 +1,9 @@
-//This now uses sha256 for hashing. This functionality comes from the file picosha2.h. I got it from google. Its
-// open source under the MIT licence. The licence is included in the file itself.
+//Program: PheonixCoin
+//Comp Sci 371 Final Project - Or at least a part of it
+//Levi Pfantz, Hunter Osterman and Ibrahim Budul
 
-//TODO:
-//Next up:
 
-//
-//      do IO in a class
-// Eventually:
-//      implemnt bool verifyTransaction(const vector<user> &userListIn) in Transaction
-//      implemnt verifyTransactions(blockIn.getTransactions()) in blockchain.cpp
-//      implement veirfySignature() in Transaction.cpp
-//      implement genSignature() in user.cpp
-//      implement verify keys imputed are in hex form with throwing errors
-//      inputting users into transactions
-//      increase polymorphism in main
-
-#include <iostream>
 #include <string>
-#include <fstream>
-#include "Transaction.h"
 #include "Block.h"
 #include "BlockChain.h"
 #include "User.h"
@@ -31,12 +16,14 @@ using namespace std;
 
 
 int main() {
+    //file name variables
     string configName = "cppConfig.txt";
     string resultFileName = "result.json";
     string userFileName = "users.json";
     string unminedBlockFileName = "unminedBlock.json";
     string blockChainFileName = "blockchain.json";
 
+    //objects that are going to be used
     BlockChain primaryChain = BlockChain();
     Block unminedBlock = Block();
     Serializer serializer;
@@ -46,35 +33,35 @@ int main() {
 
 
 
-
+    //Load Objects from files
     try {
         unminedBlock = serializer.readBlock(unminedBlockFileName);
         primaryChain = serializer.readBlockChain(blockChainFileName);
-
         primaryChain.setUserList(serializer.readUserList(userFileName));
 
     }
     catch(string e){
+        //If loading fails then write the error to the results file and exit
         serializer.outPutResultsError(e, resultFileName);
         exit(-101);
     }
 
 
 
-
+    //Initialize Driver object and pass in file names and objects
     driver=Driver(configName, resultFileName, unminedBlock, primaryChain);
 
-        driver.drive();
+    //execute the operation passed in through the config file
+    driver.drive();
 
-
+    //retrieve the objects now that the operation has been performed on them
     driver.outPut(unminedBlock, primaryChain);
 
 
-
+    //store the objects as files for hte next time the program runs
     serializer.write(unminedBlock, unminedBlockFileName);
     serializer.write(primaryChain, blockChainFileName);
     serializer.write(primaryChain.getuserList(), userFileName);
-
 
         return 0;
 }

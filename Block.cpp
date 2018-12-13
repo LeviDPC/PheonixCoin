@@ -194,6 +194,57 @@ ostream &operator<<(ostream &stream, const Block &in) {
     return stream;
 }
 
+istream &operator>>(istream &stream, Block &in){
+    int blockNumber=-1;
+    string prevHash="";
+    vector<Transaction> transactions;
+    string hash="";
+    time_t time=-1;
+    int nonce = -1;
+    int numbTrans=0;
+    Transaction temp;
+
+    cout<<"Please input BlockNumber: ";
+    stream>>blockNumber;
+    in.setBlockNumber(blockNumber);
+    cout<<endl;
+
+    cout<<"Please input a the Previous Hash: ";
+    stream>>prevHash;
+    in.setPrevHash(prevHash);
+    cout<<endl;
+
+    cout<<"Please input this block's hash if Applicable: ";
+    stream>>hash;
+    in.setSelfHash(hash);
+    cout<<endl;
+
+
+    cout<<"Please input the nonce if Applicable: ";
+    stream>>nonce;
+    in.setNonce(nonce);
+    cout<<endl;
+
+    cout<<"Please input the number of transactions: ";
+    stream>>numbTrans;
+    cout<<endl;
+
+    for(int i=0; i<numbTrans; i++){
+        temp=Transaction();
+        stream>>temp;
+        transactions.push_back(temp);
+    }
+
+    in.setTransactions(transactions);
+    in.setAutoTime();
+
+
+
+    return stream;
+
+}
+
+
 string Block::transactoinsToString() const {
 
     vector<Transaction>::const_iterator i;
@@ -215,5 +266,8 @@ string Block::transactoinsToString() const {
             str();
 }
 
+void Block::setAutoTime() {
+    Block::time = std::time(NULL);
+}
 
 

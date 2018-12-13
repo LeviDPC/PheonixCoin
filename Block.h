@@ -31,6 +31,7 @@ public:
     string toString() const;
 
 	friend ostream& operator<< (ostream& stream, const Block& in);
+    friend istream& operator>> (istream& stream, Block& in);
 
     void removeLatestTransaction();
 
@@ -74,6 +75,8 @@ public:
 	int getNonce() const;
 
 	void setNonce(int nonce);
+
+    void setAutoTime();
 
 };
 

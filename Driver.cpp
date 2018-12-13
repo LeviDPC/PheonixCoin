@@ -68,7 +68,7 @@ void Driver::drive() {
         try{newUser(); }
         catch(string e)
         {
-            outPutResultsError("Error creating new user! "+e);
+            outPutResultsError("Error creating new User! "+e);
         }
 
     }
@@ -136,7 +136,7 @@ int Driver::newUser() {
     getline(config, publicKey);
 
 
-    user out;
+    User out;
     //
     if (hasKeySet) {
 
@@ -148,7 +148,7 @@ int Driver::newUser() {
 
         }
     } else {
-        privateKey = user::genPrivateKey();
+        privateKey = User::genPrivateKey();
         out.genSetPublicKey(privateKey);
     }
 
@@ -161,7 +161,7 @@ int Driver::newUser() {
     stringstream stream;
     stream<<"{";
     stream << "\t\"status\" : \"Success!\","<<endl;
-    stream<<"\t\"operation\" : \"New user created\"," << endl;
+    stream<<"\t\"operation\" : \"New User created\"," << endl;
     stream << "\t\"username\" : \"" << out.getUserName()<<"\"," << endl;
     stream << "\t\"publickey\" : \"" << out.getPublicKey()<<"\"," << endl;
     stream << "\t\"privatekey\" : \"" << privateKey<<"\"," << endl;
@@ -210,7 +210,7 @@ int Driver::newTrans() {
         try{out.setSenderKey(senderKey);}
         catch (string e) {throw string("Unable to Set Sender Key: "+e);}
 
-        out.setSenderSig(user::genSignature(senderPrivateKey));
+        out.setSenderSig(User::genSignature(senderPrivateKey));
 
 
         try{out.setReceiverKey(receiverKey);}
@@ -228,7 +228,7 @@ int Driver::newTrans() {
         throw e;
     }
     if (!primaryChain.isPublicKeyInList(receiverKey))
-        primaryChain.addToUserList(user(receiverKey));
+        primaryChain.addToUserList(User(receiverKey));
 
 
 
