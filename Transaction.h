@@ -11,6 +11,7 @@
 #include "picosha2.h"
 #include "User.h"
 
+
 using namespace std;
 
 //Questions: 1. Why was was const used in all the get functions

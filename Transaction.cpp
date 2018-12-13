@@ -3,6 +3,7 @@
 //
 
 #include "Transaction.h"
+#include "BlockChain.h"
 
 string Transaction::getSelfHash() const {
     string out="";
@@ -62,6 +63,10 @@ ostream & operator<<(ostream & stream, const Transaction & in)
 Transaction::Transaction() {}
 
 Transaction::Transaction(const string &senderKey, const string &senderSig, int amount, const string &receiverKey) {
+    if(!BlockChain::ensureHex(senderKey))
+        throw string("Sender Key must Be valid Hex String");
+    if(!BlockChain::ensureHex(receiverKey))
+        throw string("Receiver Key must Be valid Hex String");
     Transaction::senderKey=senderKey;
     Transaction::senderSig=senderSig;
     Transaction::amount=amount;
@@ -70,6 +75,10 @@ Transaction::Transaction(const string &senderKey, const string &senderSig, int a
 }
 
 Transaction::Transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount, const string &recieverName, const string &receiverKey) {
+    if(!BlockChain::ensureHex(senderKey))
+        throw string("Sender Key must Be valid Hex String");
+    if(!BlockChain::ensureHex(receiverKey))
+        throw string("Receiver Key must Be valid Hex String");
     Transaction::senderName=senderName;
     Transaction::senderKey=senderKey;
     Transaction::senderSig=senderSig;
@@ -119,12 +128,15 @@ void Transaction::setSenderName(const string &senderName) {
 }
 
 const string &Transaction::getSenderKey() const {
+
     return senderKey;
 }
 
 void Transaction::setSenderKey(const string &senderKey) {
     if(senderKey.compare("")==0)
         throw string("Valid input is required for Sender Key");
+    if(!BlockChain::ensureHex(senderKey))
+        throw string("Sender Key must Be valid Hex String");
     Transaction::senderKey = senderKey;
 }
 
@@ -145,6 +157,7 @@ void Transaction::setReceiverName(const string &receiverName) {
 }
 
 const string &Transaction::getReceiverKey() const {
+
     return receiverKey;
 }
 

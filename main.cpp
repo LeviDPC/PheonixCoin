@@ -55,20 +55,16 @@ int main() {
 
     }
     catch(string e){
-        driver.outPutResults("Error!\n"+e);
+        driver.outPutResultsError(e);
     }
 
 
 
 
     driver=Driver(configName, resultFileName, unminedBlock, primaryChain);
-    try {
+
         driver.drive();
-    }
-    catch(string e)
-    {
-        driver.outPutResults("Error!\n"+e);
-    }
+
 
     driver.outPut(unminedBlock, primaryChain);
 

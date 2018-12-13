@@ -71,6 +71,8 @@ public:
 
     string static ensureLength(string in, int intIn=64);
 
+	static bool ensureHex(const string &in);
+
 };
 
 

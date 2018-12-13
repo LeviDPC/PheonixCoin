@@ -26,6 +26,7 @@ BlockChain::BlockChain() {}
 BlockChain::BlockChain(const vector<Block> &minedBlocks) : minedBlocks(minedBlocks) {}
 
 string BlockChain::mine(Block blockIn, const string &key) {
+    string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 
     verifyTransactions(blockIn);
@@ -37,7 +38,7 @@ string BlockChain::mine(Block blockIn, const string &key) {
     while (true) {
         //mining Threshold is a variable that the mined hash is check against. This is currently set to.
         //Using non hex formats may result in non intended results
-        string miningThreshold = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
+
         //string miningThreshold="0000000000000000000000000000000000000000000000000000000000000000";
         time_t curTime = time(NULL);
         srand(curTime);
@@ -51,11 +52,13 @@ string BlockChain::mine(Block blockIn, const string &key) {
         if (hexComp(static_cast<string>(hash), miningThreshold)) {
             // This line is just for testing purposes
             // if(BlockChain::hexComp("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe", miningThreshold)){
+
             blockIn.setBlockNumber(BlockChain::minedBlocks.size() + 1);
             blockIn.setTime(curTime);
             blockIn.setPrevHash(BlockChain::prevHash);
             blockIn.setSelfHash(hash);
             blockIn.setNonce(nonce);
+            //
 
 
             addUserIfNotExists(key);
@@ -462,4 +465,21 @@ void BlockChain::subtractFromUserByKey(const string &key, int intIn){
             BlockChain::userList[index].setBalance(out);
         }
     }
+}
+
+bool BlockChain::ensureHex(const string &in) {
+    string lower;
+    string safeArray[]= {"0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"};
+    vector<string> safeVector(begin(safeArray), end(safeArray));
+    std::vector<string>::iterator it;
+
+    for(int i=0; i<in.length(); i++){
+
+        if(in.at(i)!='a' && in.at(i)!='b' && in.at(i)!='c' && in.at(i)!='d' &&
+           in.at(i)!='e' && in.at(i)!='f' && in.at(i)!='1' && in.at(i)!='2' &&
+           in.at(i)!='3' && in.at(i)!='4' && in.at(i)!='5' && in.at(i)!='6' &&
+           in.at(i)!='7' && in.at(i)!='8' && in.at(i)!='9' && in.at(i)!='0' && in.at(i)!='-')
+            return false;
+    }
+    return true;
 }

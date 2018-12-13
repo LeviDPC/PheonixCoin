@@ -13,8 +13,20 @@ Driver::Driver(const string &configName, const string &resultFileName, const Blo
 
 void Driver::outPutResults(const string &in) {
     ofstream result(resultFileName);
-    if (result.is_open())
-        result << in;
+    if (result.is_open()){
+        result<<in;
+    }
+    result.close();
+}
+
+void Driver::outPutResultsError(const string &in) {
+    ofstream result(resultFileName);
+    if (result.is_open()){
+        result<<"{"<<endl;
+        result<<"\t\"Status\" : \"Error!\","<<endl;
+        result<<"\t\"Error\" : \""<<in<<"\""<<endl;
+        result<<"}";
+    }
     result.close();
 }
 
@@ -53,10 +65,10 @@ void Driver::drive() {
 
         opPerformed = true;
 
-        try{newUser();}
+        try{newUser(); }
         catch(string e)
         {
-            throw("Error creating new user!\n"+e);
+            outPutResultsError("Error creating new user! "+e);
         }
 
     }
@@ -66,7 +78,7 @@ void Driver::drive() {
         try{newTrans();}
         catch(string e)
         {
-            throw("Error creating new transaction!\n"+e);
+            outPutResultsError("Error creating new transaction! "+e);
         }
     }
 
@@ -76,7 +88,7 @@ void Driver::drive() {
         try{mine();}
         catch(string e)
         {
-            throw("Error creating new transaction!\n"+e);
+            outPutResultsError("Error Mining! "+e);
         }
 
     }
@@ -84,18 +96,17 @@ void Driver::drive() {
 
     if (op.compare("run") == 0) {
         opPerformed = true;
-        outPutResults("Success!\nProgram Run");
+        outPutResultsError("Program Run");
     }
 
     if (opPerformed == false)
-        outPutResults("Error!\nNo Valid Operation Selected!");
+        outPutResultsError("No Valid Operation Selected!");
 }
 
 int Driver::newUser() {
 
     if (Driver::getLinesInConfig() < 2 || Driver::getLinesInConfig() > 4) {
-        outPutResults("Error!\nInvalid Information Passed in!");
-        return -1;
+        throw string("Invalid input File");
     }
 
     string publicKey = "";
@@ -112,8 +123,8 @@ int Driver::newUser() {
     if (line.compare("true") == 0)
         hasKeySet = true;
     else if (line.compare("false") != 0) {
-        outPutResults("Error!\nImport Key boolean must be true or false");
-        return -1;
+        throw string("Import Key boolean must be true or false");
+
     }
 
     getline(config, userName);
@@ -128,8 +139,8 @@ int Driver::newUser() {
             out.setPublicKey(publicKey);
         }
         catch (string e) {
-            outPutResults("Error!\n" + static_cast<string>(e));
-            return 111;
+            throw e;
+
         }
     } else {
         privateKey = user::genPrivateKey();
@@ -143,11 +154,14 @@ int Driver::newUser() {
     primaryChain.addToUserList(out);
 
     stringstream stream;
-    stream << "Success!\nNew user created" << endl;
-    stream << "UserName: " << out.getUserName() << endl;
-    stream << "Public Key: " << out.getPublicKey() << endl;
-    stream << "Private Key: " << privateKey << endl;
-    stream << "Balance: " << out.getBalance() << endl;
+    stream<<"{";
+    stream << "\t\"status\" : \"Success!\","<<endl;
+    stream<<"\t\"operation\" : \"New user created\"," << endl;
+    stream << "\t\"username\" : \"" << out.getUserName()<<"\"," << endl;
+    stream << "\t\"publickey\" : \"" << out.getPublicKey()<<"\"," << endl;
+    stream << "\t\"privatekey\" : \"" << privateKey<<"\"," << endl;
+    stream << "\t\"balance\" : \"" << out.getBalance()<<"\"" << endl;
+    stream <<"}";
 
     outPutResults(stream.str());
 
@@ -159,8 +173,10 @@ int Driver::newUser() {
 int Driver::newTrans() {
 
     if (getLinesInConfig() != 5) {
-        outPutResults("Error!\nInvalid Information Passed in!");
-        return -1;
+        if(getLinesInConfig()==4)
+            throw string("Unable to set Receiver Key: Reciever Key cannot be Blank");
+        else
+            throw string("Invalid Config File");
     }
 
 
@@ -185,56 +201,67 @@ int Driver::newTrans() {
 
     Transaction out;
 
-    try {
-        out.setSenderKey(senderKey);
+
+        try{out.setSenderKey(senderKey);}
+        catch (string e) {throw string("Unable to Set Sender Key: "+e);}
+
         out.setSenderSig(user::genSignature(senderPrivateKey));
-        out.setReceiverKey(receiverKey);
-        out.setAmount(stoi(amount));
+
+
+        try{out.setReceiverKey(receiverKey);}
+        catch (string e) {throw string("Unable to Set Reciever Key: "+e);}
+
+        try{out.setAmount(stoi(amount));}
+        catch (exception e) {throw string("Transaction amount must be valid base 10 Number");}
         out.setAutoTime();
-    }
-    catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
-    }
+
 
     try {
         out.verifyTransaction(primaryChain.getuserList());
     }
     catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
+        throw e;
     }
     if (!primaryChain.isPublicKeyInList(receiverKey))
         primaryChain.addToUserList(user(receiverKey));
 
 
-    out.setReceiverName(primaryChain.getUserByPublicKey(receiverKey).getUserName());
-    try {
 
-        out.setSenderName(primaryChain.getUserByPublicKey(senderKey).getUserName());
-    }
-    catch(string e)
-    {throw string("Problem with Sender Key!\n"+e);}
+    try {out.setReceiverName(primaryChain.getUserByPublicKey(receiverKey).getUserName());}
+    catch(string e){throw string("Problem with Reciever Key! "+e);}
+
+    try {out.setSenderName(primaryChain.getUserByPublicKey(senderKey).getUserName());}
+    catch(string e){throw string("Problem with Sender Key! "+e);}
 
 
     if (out.getAmount() <= 0) {
 
-        outPutResults("Error\nA positive value must sent!");
-        return -1;
+        throw string("A positive value must sent!");
+
 
     }
 
     if (primaryChain.getUserByPublicKey(senderKey).getBalance() < out.getAmount()) {
-        outPutResults("Error!\nInsufficient Funds!");
-        return -1;
+        throw string("Insufficient Funds!");
+
     }
 
 
     unminedBlock.addTransaction(out);
 
     stringstream stream;
-    stream << "Success!\nNew Transaction Created!" << endl;
-    stream << out;
+
+    stream<<"{";
+    stream << "\t\"status\" : \"Success!\","<<endl;
+    stream<<"\t\"operation\" : \"New Transaction Created!\"," << endl;
+    stream << "\t\"sendername\" : \"" << out.getSenderName()<<"\"," << endl;
+    stream << "\t\"senderkey\" : \"" << out.getSenderKey()<<"\"," << endl;
+    stream << "\t\"amount\" : \"" << out.getAmount()<<"\"," << endl;
+    stream << "\t\"receivername\" : \"" << out.getReceiverName()<<"\"," << endl;
+    stream << "\t\"receiverkey\" : \"" << out.getReceiverKey()<<"\"," << endl;
+    stream << "\t\"time\" : \"" << out.getTime()<<"\"" << endl;
+    stream <<"}";
+
 
     outPutResults(stream.str());
 
@@ -253,13 +280,24 @@ int Driver::mine() {
 
 
     try {
+
         string hash = primaryChain.mine(unminedBlock, key);
-        outPutResults("Success!\nBlock Hash: " + hash);
+        stringstream stream;
+
+        stream<<"{";
+        stream << "\t\"status\" : \"Success!\","<<endl;
+        stream<<"\t\"operation\" : \"Block Mined!\"," << endl;
+        stream << "\t\"hash\" : \"" << hash<<"\"," << endl;
+        stream << "\t\"userkey\" : \"" << key<<"\"" << endl;
+        stream <<"}";
+
+
+        outPutResults(stream.str());
         unminedBlock = Block();
     }
     catch (string e) {
-        outPutResults("Error!\n" + e);
-        return -1;
+
+        throw e;
     }
 }
 

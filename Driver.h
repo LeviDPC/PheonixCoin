@@ -26,6 +26,7 @@ public:
     Driver(const string &configName, const string &resultFileName, const Block &unminedBlock, const BlockChain &primaryChain);
 
     //helper Methods
+    void outPutResultsError(const string &in);
     void outPutResults(const string &in);
     string getOpFromConfigFile();
     int getLinesInConfig();

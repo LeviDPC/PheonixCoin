@@ -1,9 +1,13 @@
 #include "User.h"
+#include "BlockChain.h"
 
 
 user::user(){}
 
 user::user(string userName, string publicKey, long balance) {
+    if(!BlockChain::ensureHex(publicKey))
+        throw string("Public Key must be a Valid Hex Number");
+
     user::userName = userName;
     user::publicKey=publicKey;
     user::balance = balance;
@@ -11,6 +15,8 @@ user::user(string userName, string publicKey, long balance) {
 }
 
 user::user(string publicKey, long balance) {
+    if(!BlockChain::ensureHex(publicKey))
+        throw string("Public Key must be a Valid Hex Number");
     user::userName = "";
     user::publicKey=publicKey;
     user::balance = balance;
@@ -43,7 +49,10 @@ void user::setUserName(string in) {
 void user::setPublicKey(string in) {
     if(in.compare("")==0)
         throw string("Valid input is required for Public Key");
-	user::publicKey = in;
+
+    if(!BlockChain::ensureHex(in))
+        throw string("Public Key must be a Valid Hex Number");
+    user::publicKey = in;
 }
 
 void user::setBalance(long in) {
@@ -139,7 +148,10 @@ string user::genSetPublicKey(const string &privateKeyIn){
 }
 
 string user::genSignature(const string &privateKeyIn){
-
+    if(!BlockChain::ensureHex(privateKeyIn))
+        throw string("Private Key must be a Valid Hex Number");
+    if(privateKeyIn.compare("")==0)
+        throw string("Valid Input Required for Private Key");
     string out="";
     picosha2::hash256_hex_string(privateKeyIn,out);
     return out;
