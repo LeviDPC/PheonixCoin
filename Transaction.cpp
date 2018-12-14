@@ -1,19 +1,63 @@
-//
-// Created by Levi on 10/6/2018.
-//
-
 #include "Transaction.h"
 #include "BlockChain.h"
 
-string Transaction::getSelfHash() const {
-    string out = "";
-    picosha2::hash256_hex_string(Transaction::toStringWithoutHash(), out);
+//constructors
+//Input validation is performed to make sure that Sender Key, Sender Sig, and Receiver Key are non empty, valid
+//Hex Strings
 
-    return out;
-
-
+Transaction::Transaction(const string &senderKey, const string &senderSig, int amount, const string &receiverKey) {
+    if (!BlockChain::ensureHex(senderKey))
+        throw string("Sender Key must Be valid Hex String");
+    if (!BlockChain::ensureHex(receiverKey))
+        throw string("Receiver Key must Be valid Hex String");
+    Transaction::senderKey = senderKey;
+    Transaction::senderSig = senderSig;
+    Transaction::amount = amount;
+    Transaction::receiverKey = receiverKey;
+    Transaction::time = std::time(NULL);
 }
 
+Transaction::Transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount,
+                         const string &recieverName, const string &receiverKey) {
+    if (!BlockChain::ensureHex(senderKey))
+        throw string("Sender Key must Be valid Hex String");
+    if (!BlockChain::ensureHex(receiverKey))
+        throw string("Receiver Key must Be valid Hex String");
+    Transaction::senderName = senderName;
+    Transaction::senderKey = senderKey;
+    Transaction::senderSig = senderSig;
+    Transaction::amount = amount;
+    Transaction::receiverName = recieverName;
+    Transaction::receiverKey = receiverKey;
+    Transaction::time = std::time(NULL);
+}
+
+Transaction::Transaction() {}
+
+
+//outputs the object as a string including generating and including a hash
+string Transaction::toString() const {
+    stringstream stream;
+    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
+           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
+    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
+           << "\nTime: " << Transaction::time << endl;
+    stream << "Transaction Hash: " << genSelfHash();
+    return stream.str();
+}
+
+//Outputs the object as a string but doesn't generate and include a hash
+string Transaction::toStringWithoutHash() const {
+    stringstream stream;
+    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
+           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
+    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
+           << "\nTime: " << Transaction::time << endl;
+    return stream.str();
+}
+
+//formats and outputs the object as a JSON file. Has the option to input leading white space, an opening tag
+//and whether it should be done on one line or multiple.
 string Transaction::JSONOutput(string whiteSpaceBeginning, string tag, bool multiLine) const {
     stringstream stream;
     string whiteSpaceEnd;
@@ -38,25 +82,37 @@ string Transaction::JSONOutput(string whiteSpaceBeginning, string tag, bool mult
     return stream.str();
 }
 
-string Transaction::toString() const {
-    stringstream stream;
-    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
-           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
-    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
-           << "\nTime: " << Transaction::time << endl;
-    stream << "Transaction Hash: " << getSelfHash();
-    return stream.str();
+
+
+//generates a hash of the Transaction object by hashing all of its attributes as strings
+string Transaction::genSelfHash() const {
+    string out = "";
+    picosha2::hash256_hex_string(Transaction::toStringWithoutHash(), out);
+
+    return out;
+
+
 }
 
-string Transaction::toStringWithoutHash() const {
-    stringstream stream;
-    stream << "Sender Name: " << Transaction::senderName << "\nSender Key: " << Transaction::senderKey
-           << "\nSender Signature: " << senderSig << "\nAmount: " << Transaction::amount;
-    stream << "\nReceiver Name: " << Transaction::receiverName << "\nReceiver Key: " << Transaction::receiverKey
-           << "\nTime: " << Transaction::time << endl;
-    return stream.str();
+//Set the time attribute to the current time
+void Transaction::setAutoTime() {
+    Transaction::time = std::time(NULL);
 }
 
+//Set the time attribute to the time imputed
+void Transaction::setManTime(time_t time) {
+    Transaction::time = time;
+}
+
+//Isn't actually implemented yet. Right now it just returns true. Ideally it would use Elliptical Curve Cryptography
+//To verify that the SenderKey attribute and the SenderSig Attribute were both generated from the same private key
+//and that the senderSig was generated specifically for this transaction.
+bool Transaction::verifySignature() const {
+    return true;
+}
+
+
+//overload operators for istream and ostream
 ostream &operator<<(ostream &stream, const Transaction &in) {
     stream << in.toString();
     return stream;
@@ -109,35 +165,10 @@ istream &operator>>(istream &stream, Transaction &in){
 }
 
 
-Transaction::Transaction() {}
 
-Transaction::Transaction(const string &senderKey, const string &senderSig, int amount, const string &receiverKey) {
-    if (!BlockChain::ensureHex(senderKey))
-        throw string("Sender Key must Be valid Hex String");
-    if (!BlockChain::ensureHex(receiverKey))
-        throw string("Receiver Key must Be valid Hex String");
-    Transaction::senderKey = senderKey;
-    Transaction::senderSig = senderSig;
-    Transaction::amount = amount;
-    Transaction::receiverKey = receiverKey;
-    Transaction::time = std::time(NULL);
-}
-
-Transaction::Transaction(const string &senderName, const string &senderKey, const string &senderSig, int amount,
-                         const string &recieverName, const string &receiverKey) {
-    if (!BlockChain::ensureHex(senderKey))
-        throw string("Sender Key must Be valid Hex String");
-    if (!BlockChain::ensureHex(receiverKey))
-        throw string("Receiver Key must Be valid Hex String");
-    Transaction::senderName = senderName;
-    Transaction::senderKey = senderKey;
-    Transaction::senderSig = senderSig;
-    Transaction::amount = amount;
-    Transaction::receiverName = recieverName;
-    Transaction::receiverKey = receiverKey;
-    Transaction::time = std::time(NULL);
-}
-
+//setters and getters
+//SetSenderKey, setSenderSig, and setReceiver Key have input validation to ensure that the input is a non empty, valid
+//Hex Strings. aside from that they are all basic setters and getters
 
 int Transaction::getBlockNumber() const {
     return blockNumber;
@@ -146,7 +177,6 @@ int Transaction::getBlockNumber() const {
 void Transaction::setBlockNumber(int blockNumber) {
     Transaction::blockNumber = blockNumber;
 }
-
 
 double Transaction::getAmount() const {
     return amount;
@@ -158,14 +188,6 @@ void Transaction::setAmount(double amount) {
 
 time_t Transaction::getTime() const {
     return time;
-}
-
-void Transaction::setManTime(time_t time) {
-    Transaction::time = time;
-}
-
-void Transaction::setAutoTime() {
-    Transaction::time = std::time(NULL);
 }
 
 const string &Transaction::getSenderName() const {
@@ -182,8 +204,6 @@ const string &Transaction::getSenderKey() const {
 }
 
 void Transaction::setSenderKey(const string &senderKey) {
-    if (senderKey.compare("") == 0)
-        throw string("Valid input is required for Sender Key");
     if (!BlockChain::ensureHex(senderKey))
         throw string("Sender Key must Be valid Hex String");
     Transaction::senderKey = senderKey;
@@ -214,18 +234,14 @@ const string &Transaction::getReceiverKey() const {
 }
 
 void Transaction::setReceiverKey(const string &receiverKey) {
-    if (receiverKey.compare("") == 0)
-        throw string("Valid input is required for Receiver Key");
+    if (!BlockChain::ensureHex(receiverKey))
+        throw string("Receiver Key must Be valid Hex String");
     Transaction::receiverKey = receiverKey;
 }
 
-bool Transaction::verifySignature() const {
-    return true;
-}
 
-bool Transaction::verifyTransaction(const vector<User> &userListIn) {
-    return true;
-}
+
+
 
 
 

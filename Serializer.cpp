@@ -4,8 +4,10 @@
 
 #include "Serializer.h"
 
-//constructor
+//constructors
 Serializer::Serializer() {}
+
+Serializer::Serializer(const string &resultFileName) : resultFileName(resultFileName) {}
 
 //Method to Read a JSON file and create a Block object from it
 Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
@@ -62,7 +64,7 @@ Block Serializer::readBlock(const string &fileName, bool readingUnmined) {
         catch (exception e) { throw string("Problem Reading Number of Transactions In Block!"); }
 
         out.setBlockNumber(blockNumInt);
-        out.setTime(timeInt);
+        out.setManTime(timeInt);
         out.setSelfHash(blockHash);
         out.setPrevHash(prevBlockHash);
         out.setNonce(nonceInt);
@@ -248,7 +250,7 @@ void Serializer::write(const vector<User> &userList, const string &fileName) {
 }
 
 //Helper Method to construct a Transaction from a JSON Formated String
-Transaction Serializer::transFromString(const string &in) {
+const Transaction Serializer::transFromString(const string &in) {
     string line = in;
 
     Transaction out = Transaction();
@@ -293,7 +295,7 @@ Transaction Serializer::transFromString(const string &in) {
 }
 
 //Takes in a string and gets the value between the Nth set of question marks
-string Serializer::getBetweenQuestionMarks(const string &stringIn, int intIn) {
+const string Serializer::getBetweenQuestionMarks(const string &stringIn, int intIn) {
     int firstMark;
     int secondMark = -1;
     for (int i = 0; i < intIn; i++) {
@@ -321,9 +323,9 @@ void Serializer::addLinesToStream(ofstream &outStream, ifstream &inStream, int n
 
 }
 
-//Formats and outputs a message to a json file
-void Serializer::outPutResultsError(const string &in, const string &resultFileName) {
-    ofstream result(resultFileName);
+//Formats and outputs an Error message to a json file
+void Serializer::outPutResultsError(const string &in) {
+    ofstream result(Serializer::resultFileName);
     if (result.is_open()) {
         result << "{" << endl;
         result << "\t\"Status\" : \"Error!\"," << endl;
@@ -332,4 +334,25 @@ void Serializer::outPutResultsError(const string &in, const string &resultFileNa
     }
     result.close();
 }
+
+//Formats and outputs a message to the result file
+void Serializer::outPutResults(const string &in) {
+    ofstream result(resultFileName);
+    if (result.is_open()){
+        result<<in;
+    }
+    result.close();
+}
+
+
+//Getter and Setter
+const string &Serializer::getResultFileName() const {
+    return resultFileName;
+}
+
+void Serializer::setResultFileName(const string &resultFileName) {
+    Serializer::resultFileName = resultFileName;
+}
+
+
 

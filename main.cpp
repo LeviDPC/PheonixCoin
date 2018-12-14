@@ -2,6 +2,8 @@
 //Comp Sci 371 Final Project - Or at least a part of it
 //Levi Pfantz, Hunter Osterman and Ibrahim Budul
 
+//This program uses the picosha2 library for hashing. This library is contained int the file picosha2.h
+//and is realeased under the MIT liscence which can be found in the file.
 
 #include <string>
 #include "Block.h"
@@ -24,12 +26,13 @@ int main() {
     string blockChainFileName = "blockchain.json";
 
     //objects that are going to be used
-    BlockChain primaryChain = BlockChain();
-    Block unminedBlock = Block();
-    Serializer serializer;
+    BlockChain primaryChain;
+    Block unminedBlock;
+    Serializer serializer(resultFileName);
     Driver driver;
 
-
+    //string to store message to output to result file.
+    string messageOut="";
 
 
 
@@ -42,7 +45,7 @@ int main() {
     }
     catch(string e){
         //If loading fails then write the error to the results file and exit
-        serializer.outPutResultsError(e, resultFileName);
+        serializer.outPutResultsError(e);
         exit(-101);
     }
 
@@ -51,8 +54,14 @@ int main() {
     //Initialize Driver object and pass in file names and objects
     driver=Driver(configName, resultFileName, unminedBlock, primaryChain);
 
-    //execute the operation passed in through the config file
-    driver.drive();
+    //execute the operation passed in through the config file and output the result
+    try{
+        messageOut=driver.drive();
+        serializer.outPutResults(messageOut);
+    }
+    catch(string e){
+        serializer.outPutResultsError(e);
+    }
 
     //retrieve the objects now that the operation has been performed on them
     driver.outPut(unminedBlock, primaryChain);

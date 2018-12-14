@@ -11,12 +11,14 @@
 #include "user.h"
 
 class Serializer {
-
+private:
+    string resultFileName;
 
 public:
 
-    //Constructor
+    //Constructors
     Serializer();
+    Serializer(const string &resultFileName);
 
     //Methods to read data from files and put it into objects
     Block readBlock(const string &fileName, bool readingUnmined=true);
@@ -30,15 +32,21 @@ public:
 
     //helper methods
     //Extracts a transaction From a string
-    Transaction transFromString(const string &in);
+    const Transaction transFromString(const string &in);
     //Takes in a string and gets the value between the Nth set of question marks
-    string getBetweenQuestionMarks(const string &stringIn, int intIn=1);
+    const string getBetweenQuestionMarks(const string &stringIn, int intIn=1);
     //Skips N amount of lines in a file
     void skipLine(ifstream &streamIn, int intIn=1);
     //Read N amount of lines form a file and writes them to a different file
     void addLinesToStream(ofstream &outStream, ifstream &inStream, int number);
-    //Formats and outputs a message to a json file
-    void outPutResultsError(const string &in, const string &resultFileName);
+    //Formats and outputs an Error message the result file
+    void outPutResultsError(const string &in);
+    //Formats and outputs a message to the result file
+    void outPutResults(const string &in);
+
+    //Getter and Setter
+    const string &getResultFileName() const;
+    void setResultFileName(const string &resultFileName);
 
 };
 

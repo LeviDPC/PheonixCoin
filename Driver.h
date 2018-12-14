@@ -14,7 +14,7 @@ using namespace std;
 class Driver {
 private:
     string configName;
-    string resultFileName;
+
 
     BlockChain primaryChain;
     Block unminedBlock;
@@ -25,28 +25,27 @@ public:
     Driver();
     Driver(const string &configName, const string &resultFileName, const Block &unminedBlock, const BlockChain &primaryChain);
 
-    //helper Methods
-    void outPutResultsError(const string &in);
-    void outPutResults(const string &in);
-    string getOpFromConfigFile();
-    int getLinesInConfig();
 
-    //primaryMethod
-    void drive();
+    //primary Method
+    const string drive();
 
     //worker methods
-    int newUser();
-    int newTrans();
-    int mine();
+    const string newUser();
+    const string newTrans();
+    const string mine();
 
     //method to output objects that opperations were prefomed on
     void outPut(Block &blockIn, BlockChain &blockChainIn);
 
+    //helper Methods
+    //This method gets the opperation to perform from the config file
+    const string getOpFromConfigFile();
+    //This opperation gets the ammount of lines in the config file
+    const int getLinesInConfig();
+
     //setters and getters
     const string &getConfigName() const;
     void setConfigName(const string &configName);
-    const string &getResultFileName() const;
-    void setResultFileName(const string &resultFileName);
     const BlockChain &getPrimaryChain() const;
     void setPrimaryChain(const BlockChain &primaryChain);
     const Block &getUnminedBlock() const;
