@@ -1,5 +1,7 @@
 # PheonixCoin is awesome!
 
+This i a crypto currency simulation I wrote for a class project. If you look at my repositories you will find the front end written by another student.
+
 A config file called cppConfig.txt is used to input data into the program.
 
 There are 3 opperation you can call: 1. add a user to the database, 2. add a transaction to the current unmined block 3. mine the current unmined block.
